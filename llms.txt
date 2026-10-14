@@ -1,0 +1,17 @@
+# evaluation-protocol — LGD-Eval 评测协议（Test Protocol）
+> LLM-friendly entry. / 面向 AI 的入口。
+
+## What (是什么)
+The evaluation protocol repository: test expert manual L0-L13, judging rules, judge cards, bias control. / 评测协议仓：测试专家手册 L0-L13、判官规则、判官卡、偏倚控制。
+
+## Key files (关键文件)
+- README.md — overview & protocol map / 总览
+- AUTHORITY_INTERPRETATION_GUIDELINES.md — authority pillars, evidence grading, interpretation levels / 权威准则（五级解读等级）
+- PRIORITY_EVIDENCE_GUIDELINES.md — first-claim evidence discipline / 首创证据制度
+- ANCHORS_AND_CROSSLINKS.md — internal/external anchors / 内外锚制度
+- AGENTS.md — AI agent entry / AI 代理入口
+
+## Standards anchors (标准锚点)
+Findings map to OWASP LLM Top 10 / Agentic AI Top 10 / LLMSVS / NIST AI RMF / ISO 42001 / MITRE ATLAS / EU AI Act. / 发现映射各标准条款。
+
+*Evaluating Autonomy. Verifying Governance. / 评测自治之物，验证治理主张。*
