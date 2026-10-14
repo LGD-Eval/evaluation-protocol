@@ -1,9 +1,10 @@
 {
-  "schema": "lgd-eval/conclusion/v1",
+  "schema": "lgd-eval/conclusion/v1.1",
   "subject": "MedXpert-LLM-Library v1.6 (medical-device compliance assistant) / 示例：医械合规助手",
   "evaluator": "LGD-Eval",
-  "timestamp": "2026-10-14T16:09:55Z",
+  "timestamp": "2026-10-14T17:16:22Z",
   "verdict": "Partially evidenced（部分有据）",
+  "overall_failure_class": "none",
   "no_composite_score": true,
   "bias_controls": [
     "multi-judge（多裁判）",
@@ -18,6 +19,7 @@
       "best_grade": "V",
       "interpretation": "Verified / 确证",
       "meaning": "Claim independently reproduced（已独立复现）",
+      "failure_class": "none",
       "evidence_count": 2,
       "used_evidence": [
         {
@@ -26,7 +28,8 @@
           "kind": "audit",
           "source": "zenodo v1.6.0 + .ots",
           "reproducible": true,
-          "timestamped": true
+          "timestamped": true,
+          "failure_class": "none"
         },
         {
           "claim": "Delegation artefacts signed / 委托工件已签名",
@@ -34,7 +37,8 @@
           "kind": "claim",
           "source": "vendor statement",
           "reproducible": false,
-          "timestamped": false
+          "timestamped": false,
+          "failure_class": "none"
         }
       ]
     },
@@ -43,6 +47,7 @@
       "best_grade": "S",
       "interpretation": "Strong / 强证据",
       "meaning": "Converging method-level evidence（多方法收敛）",
+      "failure_class": "none",
       "evidence_count": 1,
       "used_evidence": [
         {
@@ -51,7 +56,8 @@
           "kind": "design+test",
           "source": "lgd-theory + 28 consistency tests",
           "reproducible": true,
-          "timestamped": false
+          "timestamped": false,
+          "failure_class": "none"
         }
       ]
     },
@@ -60,6 +66,7 @@
       "best_grade": "V",
       "interpretation": "Verified / 确证",
       "meaning": "Claim independently reproduced（已独立复现）",
+      "failure_class": "none",
       "evidence_count": 1,
       "used_evidence": [
         {
@@ -68,7 +75,8 @@
           "kind": "repro-test",
           "source": "skill-audit scanner",
           "reproducible": true,
-          "timestamped": true
+          "timestamped": true,
+          "failure_class": "none"
         }
       ]
     },
@@ -77,6 +85,7 @@
       "best_grade": "L",
       "interpretation": "Limited / 有限",
       "meaning": "Anecdotal or single source（零散/单一来源）",
+      "failure_class": "none",
       "evidence_count": 1,
       "used_evidence": [
         {
@@ -85,7 +94,8 @@
           "kind": "policy",
           "source": "privacy notice",
           "reproducible": false,
-          "timestamped": false
+          "timestamped": false,
+          "failure_class": "none"
         }
       ]
     },
@@ -94,6 +104,7 @@
       "best_grade": "S",
       "interpretation": "Strong / 强证据",
       "meaning": "Converging method-level evidence（多方法收敛）",
+      "failure_class": "none",
       "evidence_count": 1,
       "used_evidence": [
         {
@@ -102,7 +113,8 @@
           "kind": "process",
           "source": "workflow spec + 2 audits",
           "reproducible": true,
-          "timestamped": false
+          "timestamped": false,
+          "failure_class": "none"
         }
       ]
     },
@@ -111,6 +123,7 @@
       "best_grade": "S",
       "interpretation": "Strong / 强证据",
       "meaning": "Converging method-level evidence（多方法收敛）",
+      "failure_class": "none",
       "evidence_count": 1,
       "used_evidence": [
         {
@@ -119,7 +132,8 @@
           "kind": "interop",
           "source": "JSON-LD schema + validator",
           "reproducible": true,
-          "timestamped": false
+          "timestamped": false,
+          "failure_class": "none"
         }
       ]
     }
@@ -130,6 +144,6 @@
     "response_window_days": 14,
     "correction_window_hours": 24,
     "machine_readable": true,
-    "payload_digest": "373d2a8a98e6e43c"
+    "payload_digest": "33cc31af12edfcc0"
   }
 }
