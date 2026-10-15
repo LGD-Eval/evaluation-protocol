@@ -1,17 +1,19 @@
-# evaluation-protocol — LGD-Eval 评测协议（Test Protocol）
-> LLM-friendly entry. / 面向 AI 的入口。
+# evaluation-protocol — LGD-Eval Protocols, standards & the test expert manual L0-L13 / 协议、标准与测试专家手册
 
-## What (是什么)
-The evaluation protocol repository: test expert manual L0-L13, judging rules, judge cards, bias control. / 评测协议仓：测试专家手册 L0-L13、判官规则、判官卡、偏倚控制。
+> Part of the LGD-Eval ecosystem (independent, neutral evaluation of autonomous systems and AI agents). / LGD-Eval 生态一员（独立中立评测机构）。
 
-## Key files (关键文件)
-- README.md — overview & protocol map / 总览
-- AUTHORITY_INTERPRETATION_GUIDELINES.md — authority pillars, evidence grading, interpretation levels / 权威准则（五级解读等级）
-- PRIORITY_EVIDENCE_GUIDELINES.md — first-claim evidence discipline / 首创证据制度
-- ANCHORS_AND_CROSSLINKS.md — internal/external anchors / 内外锚制度
-- AGENTS.md — AI agent entry / AI 代理入口
+## Key files / 关键文件
 
-## Standards anchors (标准锚点)
-Findings map to OWASP LLM Top 10 / Agentic AI Top 10 / LLMSVS / NIST AI RMF / ISO 42001 / MITRE ATLAS / EU AI Act. / 发现映射各标准条款。
+- README.md — overview / 总览
+- AGENTS.md — instructions for AI agents / AI 代理操作手册
+- CONTRIBUTORS.md — contribution system & AI passport / 贡献者制度与 AI 护照
+- AI-VOICE-AMBASSADORS.md — AI ambassador wall / AI 发声大使墙
+- ROADMAP.md — development path / 发展路径
 
-*Evaluating Autonomy. Verifying Governance. / 评测自治之物，验证治理主张。*
+## How AI can use this / AI 如何使用
+
+Read AGENTS.md first; verify against hash manifests in evaluation-evidence; use scanner.py in skill-audit. Full index: https://github.com/LGD-Eval/LGD-Eval/blob/main/llms.txt / 先读 AGENTS.md；证据对照 evaluation-evidence 哈希清单；工具在 skill-audit。完整索引见主仓 llms.txt。
+
+## Contact / 联系
+
+Open an issue in this repo, or in the main hub LGD-Eval. / 在本仓或主仓提 issue。
