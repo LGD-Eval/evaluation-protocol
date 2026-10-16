@@ -1,10 +1,15 @@
 {
-  "schema": "lgd-eval/conclusion/v1.1",
+  "schema": "lgd-eval/conclusion/v1.2",
   "subject": "MedXpert-LLM-Library v1.6 (medical-device compliance assistant) / 示例：医械合规助手",
   "evaluator": "LGD-Eval",
-  "timestamp": "2026-10-14T17:16:22Z",
+  "timestamp": "2026-10-16T23:01:25Z",
   "verdict": "Partially evidenced（部分有据）",
   "overall_failure_class": "none",
+  "authorization": {
+    "result": "verified",
+    "reason": "issuer listed in authoritative scope registry for this credential profile and claim type",
+    "relying_party_action": "proceed per normal policy"
+  },
   "no_composite_score": true,
   "bias_controls": [
     "multi-judge（多裁判）",
@@ -144,6 +149,6 @@
     "response_window_days": 14,
     "correction_window_hours": 24,
     "machine_readable": true,
-    "payload_digest": "33cc31af12edfcc0"
+    "payload_digest": "106e64ae1534df82"
   }
 }

@@ -25,7 +25,7 @@ P = Pending / not yet testable（待定）
 
 Failure semantics / 失败语义（v1.1 新增，对应 FG-TIDA use-cases#27 建议）
 ------------------------------------------------------------------------
-每个证据项与每个域输出 failure_class，三态：
+每个证据项与每个域输出 failure_class，四态：
 - quarantined（隔离）: malformed input — missing claim or invalid grade（输入畸形：缺声明或非法级别）
 - rejected（拒绝）   : evidence validly asserted but grade=P (pending, not yet testable)（声明合法但尚不可判定，拒绝采用）
 - unresolved（未决） : evidence exists but the link is not confirmable — verifiable kinds
@@ -33,6 +33,16 @@ Failure semantics / 失败语义（v1.1 新增，对应 FG-TIDA use-cases#27 建
                        （证据存在但链路未确认：可验证类证据缺少可复现/时间戳，或空域）
 - none（无失败）     : evidence accepted at face value（证据正常采用）
 聚合规则：overall_failure_class 取最严重类（quarantined > rejected > unresolved > none）。
+
+Authorization validity / 授权有效性维度（v1.2 新增，对应 FG-TIDA themes#42 评审反馈）
+-----------------------------------------------------------------------------
+证据分级与授权有效性是两个独立维度（见 FG-TIDA/use-cases#27 讨论与 themes#42）。
+输入 JSON 可选携带 case 级 authorization 对象：
+- result（必填）: verified / unresolved / rejected / quarantined
+- reason（必填）: 机器可读原因码/说明
+- relying_party_action（可选）: 依赖方可执行动作
+关键语义：授权信息缺失（unresolved）绝不等于已证实越权（rejected）。
+payload_digest 计算纳入 authorization，端到端可复现。
 
 Usage / 用法
 -------------
@@ -45,7 +55,7 @@ Exit codes / 退出码: 0 success（成功）, 1 input/validation error（输入
 
 Author / 作者: LGD-Eval（Independent Evaluation）
 License / 许可: Apache-2.0
-Version / 版本: v1.1 — failure semantics implemented（失败语义已实现）
+Version / 版本: v1.2 — authorization validity dimension added（授权有效性维度已加入；对应 themes#42 评审反馈）
 """
 from __future__ import annotations
 import argparse, json, sys, hashlib, datetime
@@ -66,6 +76,9 @@ GRADE_ORDER = ["V", "S", "M", "L", "P"]
 # Failure classes / 失败语义类（从最严重到无）
 FAIL_CLASSES = ["quarantined", "rejected", "unresolved", "none"]
 FAIL_ORDER = {c: i for i, c in enumerate(FAIL_CLASSES)}
+
+# Authorization validity results / 授权有效性结果（独立维度，v1.2）
+AUTH_RESULTS = ["verified", "unresolved", "rejected", "quarantined"]
 # 本应可验证的证据类型（若缺少可复现/时间戳则链路未确认）
 VERIFIABLE_KINDS = {"audit", "repro-test", "design+test", "process", "interop"}
 
@@ -118,6 +131,16 @@ def validate(evidence: dict) -> list:
                 errors.append("domain %s: invalid grade %r (允许 V/S/M/L/P)" % (key, grade))
             if not it.get("claim"):
                 errors.append("domain %s: evidence item missing 'claim' (缺少声明)" % key)
+    auth = evidence.get("authorization")
+    if auth is not None:
+        if not isinstance(auth, dict):
+            errors.append("'authorization' must be an object (authorization 必须是对象)")
+        else:
+            if auth.get("result") not in AUTH_RESULTS:
+                errors.append("authorization.result must be one of verified/unresolved/rejected/quarantined"
+                              " (授权结果必须是四态之一)")
+            if not auth.get("reason"):
+                errors.append("authorization.reason is required (授权原因必填)")
     return errors
 
 
@@ -191,20 +214,24 @@ def conclude(evidence: dict, subject: str, evaluator: str = "LGD-Eval") -> dict:
         if FAIL_ORDER[r["failure_class"]] < FAIL_ORDER[overall_fc]:
             overall_fc = r["failure_class"]
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    auth = evidence.get("authorization")
     payload = OrderedDict([
-        ("schema", "lgd-eval/conclusion/v1.1"),
+        ("schema", "lgd-eval/conclusion/v1.2"),
         ("subject", subject),
         ("evaluator", evaluator),
         ("timestamp", now),
         ("verdict", verdict),
         ("overall_failure_class", overall_fc),
+        ("authorization", auth),
         ("no_composite_score", True),
         ("bias_controls", BIAS_CONTROLS),
         ("domains", domain_results),
         ("reproducibility", {
             "open_rubric": True, "evidence_appendix": True, "response_window_days": 14,
             "correction_window_hours": 24, "machine_readable": True,
-            "payload_digest": digest_of(json.dumps(domain_results, ensure_ascii=False)),
+            "payload_digest": digest_of(json.dumps(
+                OrderedDict([("domains", domain_results), ("authorization", auth)]),
+                ensure_ascii=False)),
         }),
     ])
     return payload
@@ -278,6 +305,11 @@ DEMO = {
              "kind": "interop", "source": "JSON-LD schema + validator", "reproducible": True, "timestamped": False},
         ],
     },
+    "authorization": {
+        "result": "verified",
+        "reason": "issuer listed in authoritative scope registry for this credential profile and claim type",
+        "relying_party_action": "proceed per normal policy",
+    },
 }
 
 
@@ -305,8 +337,8 @@ def run_selftest() -> int:
         errs.append("selftest 4: composite discipline broken")
     if len(c["domains"]) != 6:
         errs.append("selftest 5: domain count != 6")
-    if c["schema"] != "lgd-eval/conclusion/v1.1":
-        errs.append("selftest 5b: schema version not v1.1")
+    if c["schema"] != "lgd-eval/conclusion/v1.2":
+        errs.append("selftest 5b: schema version not v1.2")
     # 5. Deterministic digest / 摘要确定性
     if digest_of("abc") != digest_of("abc"):
         errs.append("selftest 6: digest not deterministic")
@@ -325,11 +357,35 @@ def run_selftest() -> int:
         errs.append("selftest 11: overall failure class should be none for demo")
     if "failure_class" not in c["domains"]["D4"] or c["domains"]["D4"]["failure_class"] != "none":
         errs.append("selftest 12: D4 policy evidence failure class should be none")
+    # 13. Authorization validity dimension / 授权维度校验与透传
+    if c["schema"] != "lgd-eval/conclusion/v1.2":
+        errs.append("selftest 13: schema version not v1.2")
+    if not c.get("authorization") or c["authorization"].get("result") != "verified":
+        errs.append("selftest 13b: authorization validity not carried into conclusion")
+    bad_auth = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "V"}]},
+                "authorization": {"result": "bogus", "reason": "r"}}
+    if not validate(bad_auth):
+        errs.append("selftest 13c: invalid authorization result not rejected")
+    # 14. B1 vs B2 separation / missing evidence of authorization ≠ demonstrated invalid authorization
+    b1 = {"subject": "B1", "domains": {"D1": [{"claim": "sig", "grade": "V", "kind": "repro-test",
+                                                "reproducible": True, "timestamped": True}]},
+          "authorization": {"result": "unresolved", "reason": "scope info unavailable"}}
+    b2 = {"subject": "B2", "domains": {"D1": [{"claim": "sig", "grade": "V", "kind": "repro-test",
+                                                "reproducible": True, "timestamped": True}]},
+          "authorization": {"result": "rejected", "reason": "scope registry confirms lack of scope"}}
+    c1, c2 = conclude(b1, "B1"), conclude(b2, "B2")
+    if c1["authorization"]["result"] != "unresolved" or c2["authorization"]["result"] != "rejected":
+        errs.append("selftest 14: B1/B2 authorization separation broken")
+    if c1["reproducibility"]["payload_digest"] == c2["reproducibility"]["payload_digest"]:
+        errs.append("selftest 14b: B1/B2 digests must differ (authorization enters digest)")
+    # 15. Digest determinism including authorization / 摘要确定性（含授权维度）
+    if conclude(b1, "B1")["reproducibility"]["payload_digest"] != c1["reproducibility"]["payload_digest"]:
+        errs.append("selftest 15: digest not deterministic with authorization")
     if errs:
         for e in errs:
             print("FAIL: %s" % e)
         return 1
-    print("SELFTEST OK — 12 invariants passed（12 项不变量全部通过）")
+    print("SELFTEST OK — 15 invariants passed（15 项不变量全部通过）")
     return 0
 
 

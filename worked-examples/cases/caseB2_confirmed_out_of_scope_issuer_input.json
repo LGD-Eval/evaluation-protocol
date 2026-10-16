@@ -1,0 +1,28 @@
+{
+  "subject": "Case B2 — Confirmed out-of-scope issuer, signature valid (FG-TIDA/use-cases#27; per themes#42 review, former Case B split into B1/B2)",
+  "domains": {
+    "D1": [
+      {
+        "claim": "Credential signature cryptographically valid",
+        "grade": "V",
+        "kind": "repro-test",
+        "source": "signature replay on frozen vector T-B2a",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "claim": "Issuer lacks required scope for this credential profile and claim type",
+        "grade": "V",
+        "kind": "audit",
+        "source": "authoritative scope registry consulted at verification time; issuer not listed for this profile (frozen vector T-B2b)",
+        "reproducible": true,
+        "timestamped": true
+      }
+    ]
+  },
+  "authorization": {
+    "result": "rejected",
+    "reason": "authoritative scope registry confirms the issuer lacks the required scope for this credential profile and claim type",
+    "relying_party_action": "do not accept the credential for this operation; treat as unauthorized"
+  }
+}

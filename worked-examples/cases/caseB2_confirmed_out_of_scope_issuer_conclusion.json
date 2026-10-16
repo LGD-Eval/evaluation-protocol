@@ -1,0 +1,104 @@
+{
+  "schema": "lgd-eval/conclusion/v1.2",
+  "subject": "Case B2 — Confirmed out-of-scope issuer, signature valid (FG-TIDA/use-cases#27; per themes#42 review, former Case B split into B1/B2)",
+  "evaluator": "LGD-Eval",
+  "timestamp": "2026-10-16T23:01:14Z",
+  "verdict": "Insufficient evidence（证据不足）",
+  "overall_failure_class": "unresolved",
+  "authorization": {
+    "result": "rejected",
+    "reason": "authoritative scope registry confirms the issuer lacks the required scope for this credential profile and claim type",
+    "relying_party_action": "do not accept the credential for this operation; treat as unauthorized"
+  },
+  "no_composite_score": true,
+  "bias_controls": [
+    "multi-judge（多裁判）",
+    "human anchoring（人类锚定）",
+    "AB/BA ordering（顺序轮换）",
+    "inter-rater agreement kappa（裁判一致性）",
+    "no self-review（不自查原则）"
+  ],
+  "domains": {
+    "D1": {
+      "domain": "Identity & registration / 身份与注册",
+      "best_grade": "V",
+      "interpretation": "Verified / 确证",
+      "meaning": "Claim independently reproduced（已独立复现）",
+      "failure_class": "none",
+      "evidence_count": 2,
+      "used_evidence": [
+        {
+          "claim": "Credential signature cryptographically valid",
+          "grade": "V",
+          "kind": "repro-test",
+          "source": "signature replay on frozen vector T-B2a",
+          "reproducible": true,
+          "timestamped": true,
+          "failure_class": "none"
+        },
+        {
+          "claim": "Issuer lacks required scope for this credential profile and claim type",
+          "grade": "V",
+          "kind": "audit",
+          "source": "authoritative scope registry consulted at verification time; issuer not listed for this profile (frozen vector T-B2b)",
+          "reproducible": true,
+          "timestamped": true,
+          "failure_class": "none"
+        }
+      ]
+    },
+    "D2": {
+      "domain": "Trust lifecycle / 信任生命周期",
+      "best_grade": "P",
+      "interpretation": "Pending / 待定",
+      "meaning": "Claim not yet testable（尚不可判定）",
+      "failure_class": "unresolved",
+      "evidence_count": 0,
+      "used_evidence": []
+    },
+    "D3": {
+      "domain": "Security & resilience / 安全与韧性",
+      "best_grade": "P",
+      "interpretation": "Pending / 待定",
+      "meaning": "Claim not yet testable（尚不可判定）",
+      "failure_class": "unresolved",
+      "evidence_count": 0,
+      "used_evidence": []
+    },
+    "D4": {
+      "domain": "Privacy & data governance / 隐私与数据",
+      "best_grade": "P",
+      "interpretation": "Pending / 待定",
+      "meaning": "Claim not yet testable（尚不可判定）",
+      "failure_class": "unresolved",
+      "evidence_count": 0,
+      "used_evidence": []
+    },
+    "D5": {
+      "domain": "Human oversight & accountability / 人类监督与问责",
+      "best_grade": "P",
+      "interpretation": "Pending / 待定",
+      "meaning": "Claim not yet testable（尚不可判定）",
+      "failure_class": "unresolved",
+      "evidence_count": 0,
+      "used_evidence": []
+    },
+    "D6": {
+      "domain": "Interoperability / 互操作性",
+      "best_grade": "P",
+      "interpretation": "Pending / 待定",
+      "meaning": "Claim not yet testable（尚不可判定）",
+      "failure_class": "unresolved",
+      "evidence_count": 0,
+      "used_evidence": []
+    }
+  },
+  "reproducibility": {
+    "open_rubric": true,
+    "evidence_appendix": true,
+    "response_window_days": 14,
+    "correction_window_hours": 24,
+    "machine_readable": true,
+    "payload_digest": "c19e1781ebd4f690"
+  }
+}

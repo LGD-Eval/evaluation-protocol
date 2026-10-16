@@ -1,0 +1,28 @@
+{
+  "subject": "Case B1 — Unverifiable issuer scope, signature valid (FG-TIDA/use-cases#27; per themes#42 review, former Case B split into B1/B2)",
+  "domains": {
+    "D1": [
+      {
+        "claim": "Credential signature cryptographically valid",
+        "grade": "V",
+        "kind": "repro-test",
+        "source": "signature replay on frozen vector T-B1",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "claim": "Issuer authorized for this credential profile and claim type",
+        "grade": "L",
+        "kind": "audit",
+        "source": "issuer self-declaration only; authoritative scope registry entry unavailable at verification time",
+        "reproducible": false,
+        "timestamped": false
+      }
+    ]
+  },
+  "authorization": {
+    "result": "unresolved",
+    "reason": "authoritative issuer-scope information unavailable at verification time; missing evidence of authorization is not demonstrated invalid authorization",
+    "relying_party_action": "do not rely on authorization; treat per risk policy (deny-open or manual review)"
+  }
+}
