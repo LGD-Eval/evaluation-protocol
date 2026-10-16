@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence Grading for Verifier Decisions — Interactive Demo</title>
+<meta name="description" content="Interactive demo of evidence grading separated from authorization validity: three worked cases, machine-runnable, externally verified. LGD-Eval.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F1E2E'/%3E%3Ctext x='16' y='22' font-size='14' text-anchor='middle' fill='%23B8894A' font-family='serif' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --ink:#0F1E2E; --ink2:#22344A; --paper:#F7F4EE; --card:#FFFFFF;
+  --gold:#B8894A; --green:#2E7D5B; --blue:#3D6C9B; --amber:#B07D2E; --orange:#C46A2B; --gray:#64748B; --red:#B3403A;
+  --line:#D9D3C8; --text:#22303C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--text);font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header{background:var(--ink);color:#EDE6DA;padding:42px 0 30px}
+.brand{font-size:12px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;margin-bottom:10px}
+h1{font-size:clamp(22px,3.6vw,34px);font-weight:800;color:#FFF;line-height:1.3}
+.sub{color:#B9C4CF;margin-top:8px;font-size:14px}
+h2{font-size:19px;color:var(--ink);border-left:4px solid var(--gold);padding-left:12px;margin:34px 0 16px}
+h2 .en{color:var(--gray);font-weight:400;font-size:13px;margin-left:8px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(15,30,46,.06)}
+/* mechanism cards */
+.mcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.mcard{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--card)}
+.mcard h3{font-size:15px;color:var(--ink2);margin-bottom:8px}
+.mcard p{font-size:13px;color:var(--text)}
+.grades{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.g{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700}
+.gV{background:#E2F0E9;color:var(--green)}.gS{background:#E4EDF6;color:var(--blue)}
+.gM{background:#F6EDD9;color:var(--amber)}.gL{background:#F8E8DC;color:var(--orange)}
+.gP{background:#ECE7DE;color:var(--gray)}
+/* case selector */
+.cases{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+.casebtn{padding:10px 16px;border:1px solid var(--line);border-radius:10px;background:#FFF;color:var(--ink2);font-size:14px;cursor:pointer;text-align:left;flex:1;min-width:200px}
+.casebtn small{display:block;color:var(--gray);font-size:12px;margin-top:2px}
+.casebtn.on{border-color:var(--ink);background:var(--ink);color:#FFF}
+.casebtn.on small{color:#AEB9C4}
+.casebtn .dg{font-family:Consolas,monospace;font-size:11px;margin-top:4px;display:inline-block}
+/* split panel */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.split{grid-template-columns:1fr}}
+.panel{border:1px solid var(--line);border-radius:10px;background:#FCFAF5;padding:14px}
+.panel h4{font-size:13px;color:var(--gray);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
+.ev{margin-bottom:12px}
+.ev .row{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13px}
+.ev .lbl{min-width:24px;font-weight:700;color:var(--gold)}
+.ev .src{color:var(--gray);font-size:12px;font-style:italic}
+.tag{display:inline-block;font-size:11px;border-radius:6px;padding:1px 7px;background:#EFEAE1;color:var(--ink2);margin-left:6px}
+.verdict{font-size:17px;font-weight:800;margin:4px 0}
+.v-insufficient{color:var(--red)}
+.fclass{font-family:Consolas,monospace;font-size:13px;background:#EFEAE1;border-radius:6px;padding:2px 8px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+th{background:var(--ink);color:#EDE6DA;padding:7px 8px;text-align:left;font-weight:600;font-size:12px}
+td{padding:7px 8px;border-bottom:1px solid #ECE7DE}
+.digest{font-family:Consolas,monospace;font-size:12px;color:var(--blue);background:#E4EDF6;border-radius:6px;padding:6px 10px;display:inline-block;margin-top:10px}
+/* svg axis */
+.axis{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px}
+/* repro */
+.repro{background:#101B27;color:#C9D3DD;border-radius:12px;padding:18px;font-family:Consolas,monospace;font-size:13px;white-space:pre-wrap;overflow-x:auto}
+.repro .ok{color:#5FBF8F}.repro .k{color:var(--gold)}
+.okbar{display:inline-block;padding:4px 12px;border-radius:99px;background:#E2F0E9;color:var(--green);font-weight:700;font-size:13px;margin:8px 0}
+footer{background:var(--ink);color:#8FA0B0;padding:24px 0;margin-top:40px;font-size:12px;text-align:center}
+footer b{color:#EDE6DA}
+a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="brand">LGD-Eval · Independent AI Evaluation</div>
+    <h1>Evidence Grading for Verifier Decisions</h1>
+    <div class="sub">Separating evidence quality from authorization validity — three worked cases, machine-runnable, externally verified.</div>
+  </div>
+</header>
+
+<div class="wrap">
+  <h2>Mechanism <span class="en">Three moving parts</span></h2>
+  <div class="mcards">
+    <div class="mcard">
+      <h3>1 · Evidence grading axis</h3>
+      <p>Each claim is assigned a grade by how it was obtained and how checkable it is — never by who the actor claims to be.</p>
+      <div class="grades">
+        <span class="g gV">V · Verified</span><span class="g gS">S · Strong</span><span class="g gM">M · Moderate</span>
+        <span class="g gL">L · Limited</span><span class="g gP">P · Pending</span>
+      </div>
+    </div>
+    <div class="mcard">
+      <h3>2 · Authorization validity, separate</h3>
+      <p>A second dimension states whether the presented authorization is valid, out of scope, expired, or unverifiable — evaluated independently of evidence quality.</p>
+    </div>
+    <div class="mcard">
+      <h3>3 · Explicit failure classes</h3>
+      <p>Outcomes distinguish MUST-reject cases, distinguishable failure classes, and log-and-proceed boundaries, so verifiers fail in the same observable way.</p>
+      <div class="grades"><span class="g gP">unresolved</span><span class="g gL">rejected</span><span class="g gS">none</span></div>
+    </div>
+  </div>
+
+  <h2>Worked cases <span class="en">Click to inspect input evidence and verdict</span></h2>
+  <div class="card">
+    <div class="cases" id="cases">
+      <button class="casebtn on" data-c="A"><b>Case A</b> — Valid registered credential<small>Authorized registrar, governance root</small><span class="dg" data-dg="A"></span></button>
+      <button class="casebtn" data-c="B"><b>Case B</b> — Out-of-scope issuer<small>Signature valid, authorization unverifiable</small><span class="dg" data-dg="B"></span></button>
+      <button class="casebtn" data-c="C"><b>Case C</b> — Status source unavailable<small>No revocation record retrievable</small><span class="dg" data-dg="C"></span></button>
+    </div>
+    <div class="split">
+      <div class="panel">
+        <h4>Input evidence</h4>
+        <div id="evlist"></div>
+      </div>
+      <div class="panel">
+        <h4>Verifier conclusion</h4>
+        <div class="verdict v-insufficient" id="verdict"></div>
+        <div id="fclass"></div>
+        <div id="domains"></div>
+        <div id="digest"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>Two-axis separation <span class="en">Evidence grade ≠ authorization state</span></h2>
+  <div class="axis">
+    <svg viewBox="0 0 1040 300" width="100%" role="img" aria-label="Two-axis separation of evidence grading and authorization validity">
+      <rect x="10" y="10" width="500" height="120" rx="10" fill="#E2F0E9" stroke="#2E7D5B"/>
+      <text x="30" y="40" font-size="15" font-weight="700" fill="#1D4A38">Evidence axis — claim quality</text>
+      <text x="30" y="66" font-size="12" fill="#334">V Verified · S Strong · M Moderate · L Limited · P Pending</text>
+      <text x="30" y="100" font-size="12" fill="#334">Case A D1: two V-grade claims, independently reproduced</text>
+      <rect x="530" y="10" width="500" height="120" rx="10" fill="#E4EDF6" stroke="#3D6C9B"/>
+      <text x="550" y="40" font-size="15" font-weight="700" fill="#1E3A56">Authorization axis — state</text>
+      <text x="550" y="66" font-size="12" fill="#334">valid · out-of-scope · expired · unverifiable</text>
+      <text x="550" y="100" font-size="12" fill="#334">Case B: signature V-grade, but issuer authorization unverifiable</text>
+      <rect x="260" y="150" width="520" height="48" rx="24" fill="#0F1E2E"/>
+      <text x="520" y="181" text-anchor="middle" font-size="14" font-weight="700" fill="#EDE6DA">never merged — each axis reported and defended separately</text>
+      <text x="30" y="225" font-size="13" fill="#64748B">The verifier says: "the evidence is strong, but this operation was not authorized"</text>
+      <text x="30" y="248" font-size="13" fill="#64748B">or: "the authorization is valid, but the supporting evidence is weak" — never a single blended verdict.</text>
+    </svg>
+  </div>
+
+  <h2>Reproduction <span class="en">clone → run → verify, from a clean checkout</span></h2>
+  <div class="card">
+    <p style="font-size:13px;margin-bottom:10px">External verification performed 2026-10-16 on a fresh download of the public repository (no local configuration used):</p>
+    <div class="okbar">SELFTEST PASS — 12 invariants · 3/3 cases match published payload digests</div>
+    <div class="repro">$ python tools/evidence-grader.py --selftest
+SELFTEST OK — 12 invariants passed（12 项不变量全部通过）
+
+$ python tools/evidence-grader.py --json worked-examples/cases/caseA_valid_registered_credential_input.json --out /tmp/caseA.json
+$ python tools/evidence-grader.py --json worked-examples/cases/caseB_out_of_scope_issuer_input.json --out /tmp/caseB.json
+$ python tools/evidence-grader.py --json worked-examples/cases/caseC_unavailable_status_source_input.json --out /tmp/caseC.json
+
+re-generated payload digests vs published:
+  caseA  edc9b6fafba9ccf4  <span class="ok">MATCH</span>
+  caseB  995eba87beff6e7a  <span class="ok">MATCH</span>
+  caseC  faaf76277c4ac390  <span class="ok">MATCH</span></div>
+    <p style="font-size:12px;color:var(--gray);margin-top:12px">
+      Repository: <a href="https://github.com/LGD-Eval/evaluation-protocol" target="_blank" rel="noopener">github.com/LGD-Eval/evaluation-protocol</a> ·
+      Examples: <a href="https://github.com/LGD-Eval/evaluation-protocol/tree/main/worked-examples/cases" target="_blank" rel="noopener">worked-examples/cases</a> ·
+      Theme: <a href="https://github.com/FG-TIDA/themes/issues/42" target="_blank" rel="noopener">FG-TIDA/themes#42</a></p>
+  </div>
+</div>
+
+<footer>
+  <b>LGD-Eval — Independent AI Evaluation</b> · Registry / Evidence / Gates · demo data verbatim from the public worked-examples, externally re-verified
+</footer>
+
+<script>
+var DATA = {
+  A: {
+    verdict: "Insufficient evidence（证据不足）",
+    fclass: "unresolved",
+    digest: "edc9b6fafba9ccf4",
+    ev: [
+      {d:"D1", g:"V", claim:"Registration credential issued by registrar authorized under a governance root", kind:"audit", src:"frozen test vector T-A1 + independent replay"},
+      {d:"D1", g:"V", claim:"Registrar scope verified: resource within declared registration domain", kind:"repro-test", src:"frozen test vector T-A2 + independent replay"},
+      {d:"D2", g:"V", claim:"Credential status current: no revocation, suspension or expiry at verification time", kind:"process", src:"signed status response, frozen vector T-A3"}
+    ],
+    dom: [["D1","V","Verified"],["D2","V","Verified"],["D3","P","Pending"],["D4","P","Pending"],["D5","P","Pending"],["D6","P","Pending"]]
+  },
+  B: {
+    verdict: "Insufficient evidence（证据不足）",
+    fclass: "unresolved",
+    digest: "995eba87beff6e7a",
+    ev: [
+      {d:"D1", g:"V", claim:"Credential signature cryptographically valid", kind:"repro-test", src:"signature replay on frozen vector T-B1"},
+      {d:"D1", g:"L", claim:"Issuer authorized for this credential profile and claim type", kind:"audit", src:"issuer self-declaration only; scope registry entry unavailable"}
+    ],
+    dom: [["D1","V","Verified (but unresolved) "],["D2","P","Pending"],["D3","P","Pending"],["D4","P","Pending"],["D5","P","Pending"],["D6","P","Pending"]]
+  },
+  C: {
+    verdict: "Insufficient evidence（证据不足）",
+    fclass: "unresolved",
+    digest: "faaf76277c4ac390",
+    ev: [
+      {d:"D2", g:"L", claim:"Credential status current (not revoked)", kind:"audit", src:"status endpoint unreachable at verification time; no revocation record retrievable"}
+    ],
+    dom: [["D1","P","Pending"],["D2","L","Limited"],["D3","P","Pending"],["D4","P","Pending"],["D5","P","Pending"],["D6","P","Pending"]]
+  }
+};
+function gc(g){return '<span class="g g'+g+'">'+g+'</span>'}
+function render(c){
+  var d = DATA[c];
+  var ev='';
+  d.ev.forEach(function(e){ ev+='<div class="ev"><div class="row">'+gc(e.g)+'<span><b>'+e.claim+'</b><span class="tag">'+e.d+' · '+e.kind+'</span></span></div><div class="row"><span class="lbl"></span><span class="src">'+e.src+'</span></div></div>'; });
+  document.getElementById('evlist').innerHTML=ev;
+  document.getElementById('verdict').textContent=d.verdict;
+  document.getElementById('fclass').innerHTML='<span class="fclass">failure class: '+d.fclass+'</span>';
+  var rows='<table><thead><tr><th>Domain</th><th>Best grade</th><th>Interpretation</th></tr></thead><tbody>';
+  d.dom.forEach(function(r){ rows+='<tr><td>'+r[0]+'</td><td>'+gc(r[1])+'</td><td>'+r[2]+'</td></tr>'; });
+  rows+='</tbody></table>';
+  document.getElementById('domains').innerHTML=rows;
+  document.getElementById('digest').innerHTML='<span class="digest">payload digest: '+d.digest+'</span>';
+}
+document.querySelectorAll('.casebtn').forEach(function(b){
+  var dg = DATA[b.getAttribute('data-c')].digest;
+  b.querySelector('[data-dg]').textContent = 'digest '+dg;
+  b.addEventListener('click', function(){
+    document.querySelectorAll('.casebtn').forEach(function(x){x.classList.remove('on')});
+    b.classList.add('on');
+    render(b.getAttribute('data-c'));
+  });
+});
+render('A');
+</script>
+</body>
+</html>
