@@ -1,0 +1,23 @@
+{
+  "subject": "Case B — Out-of-scope credential issuer, signature valid (FG-TIDA/use-cases#27)",
+  "domains": {
+    "D1": [
+      {
+        "claim": "Credential signature cryptographically valid",
+        "grade": "V",
+        "kind": "repro-test",
+        "source": "signature replay on frozen vector T-B1",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "claim": "Issuer authorized for this credential profile and claim type",
+        "grade": "L",
+        "kind": "audit",
+        "source": "issuer self-declaration only; scope registry entry unavailable at verification time",
+        "reproducible": false,
+        "timestamped": false
+      }
+    ]
+  }
+}
