@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="660" viewBox="0 0 960 660">
+  <defs>
+    <style>
+      .bg{fill:#FAFAFA}.dark .bg{fill:#101018}
+      .card-a{fill:#EAF2FD}.dark .card-a{fill:#12233D}
+      .card-b{fill:#FDF0EC}.dark .card-b{fill:#3A1E14}
+      .card-base{fill:#F4F4F4}.dark .card-base{fill:#1C1C28}
+      .row{fill:#FFFFFF}.dark .row{fill:#16161F}
+      .title{fill:#1A1A2E}.dark .title{fill:#E8E8F0}
+      .sub{fill:#555}.dark .sub{fill:#9A9AB0}
+      .stroke-a{stroke:#2E5FA3}.dark .stroke-a{stroke:#5B8DD9}
+      .stroke-b{stroke:#B34A2E}.dark .stroke-b{stroke:#D97B5B}
+      .stroke-c{stroke:#999}.dark .stroke-c{stroke:#666}
+      .center-pill{fill:#1A1A2E}.dark .center-pill{fill:#E8E8F0}
+      .center-txt{fill:#fff}.dark .center-txt{fill:#1A1A2E}
+      .ok{fill:#E7F6EC}.dark .ok{fill:#16301F}
+      .warn{fill:#FDF6E3}.dark .warn{fill:#332A10}
+      .bad{fill:#FDECEA}.dark .bad{fill:#3A1A1A}
+      .ok-stroke{stroke:#2E9E5B}.dark .ok-stroke{stroke:#4ECB83}
+      .warn-stroke{stroke:#B8860B}.dark .warn-stroke{stroke:#E0B44F}
+      .bad-stroke{stroke:#C0392B}.dark .bad-stroke{stroke:#E06A5C}
+      text{font-family:"Segoe UI",Arial,sans-serif}
+    </style>
+  </defs>
+  <rect width="960" height="660" class="bg"/>
+  <text x="480" y="40" font-size="22" font-weight="bold" text-anchor="middle" class="title">Evidence Grading × Authorization Validity — Two Independent Dimensions</text>
+  <text x="480" y="66" font-size="13.5" text-anchor="middle" class="sub">Cryptographically valid does not imply authorized, current and in-scope. The two dimensions are graded and reported separately.</text>
+
+  <!-- 左轨: Evidence grade -->
+  <rect x="40" y="96" width="420" height="392" rx="14" class="card-a stroke-a"/>
+  <text x="250" y="124" font-size="17" font-weight="bold" text-anchor="middle" class="title">Evidence grade (per claim)</text>
+  <text x="250" y="146" font-size="12" text-anchor="middle" class="sub">reproducible output of evidence-grader</text>
+  <g font-size="13.5">
+    <rect x="70" y="166" width="360" height="46" rx="8" class="row stroke-a"/>
+    <text x="92" y="188" class="title"><tspan font-weight="bold">V — Verified</tspan>  independently reproduced</text>
+    <text x="92" y="204" class="sub">frozen vector replay, deterministic JSON</text>
+    <rect x="70" y="220" width="360" height="46" rx="8" class="row stroke-a"/>
+    <text x="92" y="242" class="title"><tspan font-weight="bold">S — Strong</tspan>  converging method-level evidence</text>
+    <text x="92" y="258" class="sub">≥2 independent methods agree</text>
+    <rect x="70" y="274" width="360" height="46" rx="8" class="row stroke-a"/>
+    <text x="92" y="296" class="title"><tspan font-weight="bold">M — Moderate</tspan>  partial reproduction</text>
+    <text x="92" y="312" class="sub">single method / subset reproduced</text>
+    <rect x="70" y="328" width="360" height="46" rx="8" class="row stroke-a"/>
+    <text x="92" y="350" class="title"><tspan font-weight="bold">L — Limited</tspan>  single source, not reproduced</text>
+    <rect x="70" y="382" width="360" height="46" rx="8" class="row stroke-a"/>
+    <text x="92" y="404" class="title"><tspan font-weight="bold">P — Pending</tspan>  not yet testable</text>
+    <text x="92" y="420" class="sub">→ authorization result: rejected</text>
+  </g>
+
+  <!-- 右轨: Authorization result -->
+  <rect x="500" y="96" width="420" height="392" rx="14" class="card-b stroke-b"/>
+  <text x="710" y="124" font-size="17" font-weight="bold" text-anchor="middle" class="title">Authorization result (per chain link)</text>
+  <text x="710" y="146" font-size="12" text-anchor="middle" class="sub">governance root → registrar → issuer → controller</text>
+  <g font-size="13.5">
+    <rect x="530" y="166" width="360" height="46" rx="8" class="ok ok-stroke"/>
+    <text x="552" y="188" class="title"><tspan font-weight="bold">verified</tspan>  authorized, current, in-scope</text>
+    <text x="552" y="204" class="sub">chain lookup succeeds end-to-end</text>
+    <rect x="530" y="220" width="360" height="46" rx="8" class="warn warn-stroke"/>
+    <text x="552" y="242" class="title"><tspan font-weight="bold">unresolved</tspan>  link not confirmable</text>
+    <text x="552" y="258" class="sub">e.g. issuer scope registry unavailable</text>
+    <rect x="530" y="274" width="360" height="46" rx="8" class="bad bad-stroke"/>
+    <text x="552" y="296" class="title"><tspan font-weight="bold">rejected</tspan>  evidence grade P (not yet testable)</text>
+    <rect x="530" y="328" width="360" height="46" rx="8" class="bad bad-stroke"/>
+    <text x="552" y="350" class="title"><tspan font-weight="bold">quarantined</tspan>  malformed input / invalid claim</text>
+  </g>
+
+  <!-- 中间: never merged -->
+  <rect x="430" y="260" width="100" height="62" rx="31" class="center-pill"/>
+  <text x="480" y="287" font-size="13" font-weight="bold" text-anchor="middle" class="center-txt">never</text>
+  <text x="480" y="306" font-size="13" font-weight="bold" text-anchor="middle" class="center-txt">merged</text>
+
+  <!-- 案例底带 -->
+  <rect x="40" y="506" width="880" height="128" rx="14" class="card-base stroke-c"/>
+  <text x="480" y="532" font-size="15" font-weight="bold" text-anchor="middle" class="title">Worked example — Case B (out-of-scope issuer, signature valid)</text>
+  <g font-size="13.5">
+    <rect x="70" y="548" width="400" height="62" rx="10" class="ok ok-stroke"/>
+    <text x="92" y="572" class="title">Signature dimension: <tspan font-weight="bold">V (Verified)</tspan></text>
+    <text x="92" y="592" class="sub">reproduced via frozen vector replay → strong evidence of signature validity</text>
+    <rect x="510" y="548" width="400" height="62" rx="10" class="warn warn-stroke"/>
+    <text x="532" y="572" class="title">Authorization dimension: <tspan font-weight="bold">unresolved</tspan></text>
+    <text x="532" y="592" class="sub">issuer scope registry entry unavailable → no authorization claim is made</text>
+  </g>
+  <text x="480" y="652" font-size="11.5" text-anchor="middle" class="sub">Outcome for Case B: indeterminate (authorization unresolved). Relying-party action: do not rely on authorization; deny-open or manual review.</text>
+</svg>
