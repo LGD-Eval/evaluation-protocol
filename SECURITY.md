@@ -1,21 +1,19 @@
-# Security Policy — 安全策略（LGD-Eval）
+# Security Policy / 安全政策
 
-## Reporting a vulnerability（报告漏洞）
-If you discover a security issue in any LGD-Eval repository (including the skill-audit scanner), please do **not** open a public issue. Report it privately instead.
-如您发现 LGD-Eval 任一仓库（含 skill-audit 扫描器）存在安全问题，请勿公开发 issue，改为私下报告。
+## Supported Versions / 受支持版本
+Only the latest release is actively supported for security fixes.
+仅最新版本提供安全修复支持。
 
-**How to report / 报告方式：**
-- GitHub Security Advisory: use the repo's "Report a vulnerability" private channel（使用仓库"报告漏洞"私有通道）
-- Or email the maintainer account (see profile). / 或邮件联系维护账号（见 Profile）。
+## Reporting a Vulnerability / 报告漏洞
+Please **do not** open a public issue for security vulnerabilities.
+安全漏洞请勿公开发布 issue。
 
-**What we commit to / 我们承诺：**
-- Acknowledge within 48 hours. / 48 小时内确认收到。
-- Provide a fix timeline within 5 business days. / 5 个工作日内给出修复时间表。
-- Credit the reporter in the advisory unless anonymity is requested. / 除非要求匿名，否则在公告中署名报告者。
-- Follow responsible disclosure: we release fixes first, details after. / 遵循负责任披露：先修复后公开细节。
+- Report privately: create a private advisory via the repository's
+  Security > Advisories page, or contact the maintainer directly.
+  请通过仓库 Security > Advisories 页创建私有通报，或直接联系维护者。
+- Expected response: acknowledgement within 5 business days / 5 个工作日内确认。
 
-**Scope / 范围：** public repositories under github.com/LGD-Eval. / github.com/LGD-Eval 下的公开仓库。
-
-**Out of scope / 不在范围：** the theory account (zhaoxinghua09-cell) and product account (stevenzhao07) repositories are owned by their maintainers; report there directly. / 理论号与产品号仓库属其维护者，请直接向其报告。
-
-*Evaluating Autonomy. Verifying Governance. / 评测自治之物，验证治理主张。*
+## Security Practices / 安全实践
+- Dependabot: weekly dependency updates / 每周依赖更新。
+- CodeQL SAST: continuous static analysis / 持续静态分析。
+- OpenSSF Scorecard: automated supply-chain scoring / 自动化供应链评分。
