@@ -22,7 +22,7 @@ LGD-Eval is an **independent third-party evaluation group**. Evaluations we publ
 Out of scope: certification, accreditation, conformity assessment with legal effect,
 regulatory opinion, or endorsement of any product or vendor.
 
-## 2. Evidence Model (evidence-grader v1.2)
+## 2. Evidence Model (evidence-grader v1.3)
 
 Each evaluated claim is graded on two axes:
 
@@ -38,12 +38,24 @@ Each evaluated claim is graded on two axes:
 
 ### 2.2 Authorization verdict (per decision)
 
+The verification verdict has three states. This is the vocabulary used in `outcome.verification`.
+
 | Verdict | Meaning | Operator meaning |
 |---|---|---|
-| `verified` | Evidence measured and consistent with authorization | ALLOW |
-| `unresolved` | Evidence absent or unmeasurable — not yet decidable | DEFER (do not default to allow) |
-| `rejected` | Evidence measured and found inconsistent | DENY |
-| `quarantined` | Normative semantics of the field still unsettled | EXCLUDE from formal result until spec settles |
+| `verified` | Authorization established and current | ALLOW |
+| `unresolved` | Authorization cannot be established — not yet decidable | DEFER (do not default to allow) |
+| `rejected` | Authorization affirmatively not valid — established by evidence | DENY |
+
+**Operator action is a separate axis.** What a relying party does is policy-dependent, so it is recorded in its own field (`outcome.policy_action`) and never merged into the verdict. `reject` is not available as an action name: the word is reserved for the verdict, so the two levels stay distinguishable at a glance.
+
+| Operator action | Meaning | Typical trigger |
+|---|---|---|
+| `allow` | Proceed under normal policy | `verified` |
+| `defer` | Do not default to allow; hold for review or escalation | `unresolved` |
+| `deny` | Do not accept | `rejected` |
+| `exclude` | Keep out of the formal result until the normative semantics settle | Field semantics still unsettled — this is **not** a verification verdict |
+
+`quarantined` was a fourth value of the verdict up to v1.2 and was removed in v1.3: it described a handling decision over an unsettled field, not something that had been verified. It is now `policy_action: exclude`. Evidence-level `failure_class` still reports `quarantined` for malformed input; that is the evidence axis (§2.1) and is unchanged.
 
 ### 2.3 Payload digest convention
 
@@ -51,6 +63,33 @@ Canonical digest = `SHA-256( json.dumps(obj, sort_keys=True, separators=(",",":"
 Digests are truncated to the first 16 hex chars as vector ids in worked examples, and
 quoted in full in evidence records. Re-running the same canonical input must reproduce
 the same digest (determinism check, see §4).
+
+The digest covers the substantive objects of a conclusion (`domains`, `authorization`,
+`outcome`) and excludes `timestamp`, so reproduction is date-independent. `verdict` and
+`overall_failure_class` are pure functions of `domains` and are covered transitively.
+
+> **Correction (v1.3, 2026-10-23).** The convention above has been published in this
+> section since v0.1, but the v1.2 implementation computed the digest with default JSON
+> separators (`", "` / `": "`) and insertion order rather than `sort_keys=True` with
+> compact separators. A third party following this section could therefore not reproduce
+> any published digest. The implementation now matches the text; all four v1.2 digests
+> were recomputed, with the reasons listed in `worked-examples/cases/README.md`.
+
+### 2.4 Case outcome vs coverage verdict
+
+A conclusion reports two summary fields that answer different questions, and reading the
+wrong one reports a passing case as a failure:
+
+| Field | Answers | Scope |
+|---|---|---|
+| `outcome.verification` | What is the case-level conclusion for the dimension under test? | The case |
+| `verdict` | How much of the six-domain evidence grid is covered at grade V/S? | The grid |
+
+A case set that exercises one or two of the six domains is `Insufficient evidence` under
+`verdict` by construction, even when its authorization outcome is `verified`. Readers and
+programs should take the case conclusion from `outcome.verification`. Each conclusion also
+carries a `scopes` object stating this in machine-readable form, so the distinction
+travels with the data instead of living only in documentation.
 
 ## 3. Evaluation Report Format
 
@@ -83,7 +122,10 @@ displayed with the disclaimer text defined there.
 
 ## 6. Versioning & Change
 
-- Protocol version: v1.2 (evidence-grader). This document: v0.1.
+- Protocol version: v1.3 (evidence-grader). This document: v0.2.
+- v1.3 (2026-10-23): case outcome separated from the coverage verdict; operator action split
+  out of the verdict vocabulary; digest computation corrected to match §2.3. All worked-example
+  digests recomputed.
 - Changes are tracked in git; worked examples updated atomically with the grader.
 - Zenodo record for protocol releases: https://zenodo.org/records/23428476 (CC-BY-4.0).
 

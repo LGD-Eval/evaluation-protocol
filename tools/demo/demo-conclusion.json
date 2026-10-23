@@ -1,14 +1,29 @@
 {
-  "schema": "lgd-eval/conclusion/v1.2",
+  "schema": "lgd-eval/conclusion/v1.3",
   "subject": "MedXpert-LLM-Library v1.6 (medical-device compliance assistant) / 示例：医械合规助手",
   "evaluator": "LGD-Eval",
-  "timestamp": "2026-10-16T23:01:25Z",
+  "timestamp": "2026-10-23T09:14:50Z",
+  "outcome": {
+    "verification": "verified",
+    "reason_code": "none",
+    "policy_dependent": true,
+    "policy_action": "allow",
+    "relying_party_action": "proceed per normal policy"
+  },
   "verdict": "Partially evidenced（部分有据）",
+  "scopes": {
+    "outcome": "Case-level verification outcome for the dimension under test — read this field for the case conclusion. / 用例结论，读这个字段。",
+    "verdict": "Six-domain evidence coverage: how many of the six domains reach V/S. A case that exercises one or two domains is 'Insufficient evidence' here by construction — this is NOT a case outcome. / 六域覆盖度，不是用例结论。",
+    "overall_failure_class": "Worst evidence failure class across the six domains; an unexercised (empty) domain is 'unresolved' by v1.x design. / 空域按 v1.x 设计记为 unresolved。",
+    "policy_action": "Policy-dependent action, recorded separately from the verification outcome (allow / defer / deny / exclude), reusing the operator meanings in EVALUATION-STANDARD.md §2.2. / 策略动作，与结论分开，词表与规范一致。"
+  },
   "overall_failure_class": "none",
   "authorization": {
     "result": "verified",
+    "reason_code": "none",
     "reason": "issuer listed in authoritative scope registry for this credential profile and claim type",
-    "relying_party_action": "proceed per normal policy"
+    "relying_party_action": "proceed per normal policy",
+    "policy_action": "allow"
   },
   "no_composite_score": true,
   "bias_controls": [
@@ -149,6 +164,12 @@
     "response_window_days": 14,
     "correction_window_hours": 24,
     "machine_readable": true,
-    "payload_digest": "106e64ae1534df82"
+    "digest_covers": [
+      "domains",
+      "authorization",
+      "outcome"
+    ],
+    "digest_convention": "sha256(json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False))[:16] — EVALUATION-STANDARD.md §2.3",
+    "payload_digest": "85553ea3d90ea4b2"
   }
 }

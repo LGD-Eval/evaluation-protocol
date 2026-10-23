@@ -38,11 +38,37 @@ Authorization validity / 授权有效性维度（v1.2 新增，对应 FG-TIDA th
 -----------------------------------------------------------------------------
 证据分级与授权有效性是两个独立维度（见 FG-TIDA/use-cases#27 讨论与 themes#42）。
 输入 JSON 可选携带 case 级 authorization 对象：
-- result（必填）: verified / unresolved / rejected / quarantined
-- reason（必填）: 机器可读原因码/说明
+- result（必填）: verified / unresolved / rejected
+- reason_code（v1.3 起必填）: 机器可读原因码，见 REASON_CODES
+- reason（必填）: 人读说明
 - relying_party_action（可选）: 依赖方可执行动作
+- policy_action（v1.3 起必填）: allow / defer / deny / exclude（取 EVALUATION-STANDARD.md §2.2）
 关键语义：授权信息缺失（unresolved）绝不等于已证实越权（rejected）。
-payload_digest 计算纳入 authorization，端到端可复现。
+
+Case outcome / 用例结论（v1.3 新增，对应 FG-TIDA use-cases#27 @wolfbrother 2026-10-23 反馈）
+--------------------------------------------------------------------------------------------
+v1.2 的结论里只有一个 `verdict`，它是**六域证据覆盖度**判词（六个域里有几个达到 V/S），
+不是用例结论。一个只覆盖 1—2 个域的用例，`verdict` 必然是 `Insufficient evidence`，
+哪怕它的授权结论是 `verified`——程序若读 `verdict` 当结论，会把正例读成"证据不足"。
+
+v1.3 起把两件事分开写：
+- `outcome.verification` : 用例结论，三态 verified / unresolved / rejected，**这是要读的字段**；
+- `verdict`              : 保留原义（六域覆盖度），并由 `scopes` 显式标注其口径。
+
+同时把"策略动作"从"验证结论"里拆出来（@wolfbrother 的第三点）：
+- `quarantined` 不再出现在 authorization.result 里——它是处置动作，不是验证结论；
+- 处置动作统一进 `policy_action`，**直接采用 EVALUATION-STANDARD.md §2.2 已公布的四个词**：
+  allow / defer / deny / exclude（原文的 ALLOW / DEFER / DENY / EXCLUDE）。
+  不再另造一套（v1.3 起；此前只把动作写成自由文本 `relying_party_action`，机器不可读）。
+  刻意**不用** reject 当动作名，避免与结论词 rejected 撞车。
+
+payload_digest 采取 EVALUATION-STANDARD.md §2.3 已经写明的算法：
+    SHA-256( json.dumps(obj, sort_keys=True, separators=(",",":"), ensure_ascii=False) )[:16]
+v1.2 的实现与 §2.3 不一致（用了默认分隔符 ", " / ": " 且未排序键），
+后果是任何第三方照 §2.3 自己算一遍都得不到我们公布的摘要；v1.3 予以更正。
+摘要覆盖 domains + authorization + outcome 三个实质对象；`verdict` 与
+`overall_failure_class` 是 domains 的纯函数，可由摘要覆盖的内容重算；
+`timestamp` 不进摘要，以保证任何一天复现都得到同一摘要。
 
 Usage / 用法
 -------------
@@ -55,11 +81,15 @@ Exit codes / 退出码: 0 success（成功）, 1 input/validation error（输入
 
 Author / 作者: LGD-Eval（Independent Evaluation）
 License / 许可: Apache-2.0
-Version / 版本: v1.2 — authorization validity dimension added（授权有效性维度已加入；对应 themes#42 评审反馈）
+Version / 版本: v1.3 — case outcome separated from domain-coverage verdict; policy actions
+                 split out of the verification vocabulary（用例结论与覆盖度判词分离；策略动作
+                 从验证词表中拆出；对应 use-cases#27 @wolfbrother 2026-10-23 反馈）
 """
 from __future__ import annotations
 import argparse, json, sys, hashlib, datetime
 from collections import OrderedDict
+
+SCHEMA = "lgd-eval/conclusion/v1.3"
 
 # Domain definitions / 六域定义（与 C2 贡献稿一致）
 DOMAINS = OrderedDict([
@@ -77,8 +107,23 @@ GRADE_ORDER = ["V", "S", "M", "L", "P"]
 FAIL_CLASSES = ["quarantined", "rejected", "unresolved", "none"]
 FAIL_ORDER = {c: i for i, c in enumerate(FAIL_CLASSES)}
 
-# Authorization validity results / 授权有效性结果（独立维度，v1.2）
-AUTH_RESULTS = ["verified", "unresolved", "rejected", "quarantined"]
+# Verification vocabulary / 验证词表（单一词表，结论与授权共用同一套三个词）
+AUTH_RESULTS = ["verified", "unresolved", "rejected"]
+OUTCOMES = ["verified", "unresolved", "rejected"]
+AUTH_TO_OUTCOME = {"verified": "verified", "unresolved": "unresolved", "rejected": "rejected"}
+
+# Machine-readable reason codes / 机器可读原因码
+REASON_CODES = ["none", "authorization_unresolved", "authorization_rejected", "status_unavailable"]
+REASON_FOR_RESULT = {
+    "verified": ["none"],
+    "unresolved": ["authorization_unresolved", "status_unavailable"],
+    "rejected": ["authorization_rejected"],
+}
+
+# Policy actions / 处置动作（策略相关，与验证结论分开记录）
+# 取自 EVALUATION-STANDARD.md §2.2 的 operator meaning，不另造词表
+POLICY_ACTIONS = ["allow", "defer", "deny", "exclude"]
+
 # 本应可验证的证据类型（若缺少可复现/时间戳则链路未确认）
 VERIFIABLE_KINDS = {"audit", "repro-test", "design+test", "process", "interop"}
 
@@ -100,6 +145,20 @@ INTERPRET = {
           "meaning": "Claim not yet testable（尚不可判定）",
           "evidence": "Explicit scope statement（明确范围声明）"},
 }
+
+# Field scopes / 字段口径（防止把覆盖度判词当用例结论读）
+SCOPES = OrderedDict([
+    ("outcome", "Case-level verification outcome for the dimension under test — "
+                "read this field for the case conclusion. / 用例结论，读这个字段。"),
+    ("verdict", "Six-domain evidence coverage: how many of the six domains reach V/S. "
+                "A case that exercises one or two domains is 'Insufficient evidence' here "
+                "by construction — this is NOT a case outcome. / 六域覆盖度，不是用例结论。"),
+    ("overall_failure_class", "Worst evidence failure class across the six domains; an "
+                              "unexercised (empty) domain is 'unresolved' by v1.x design. "
+                              "/ 空域按 v1.x 设计记为 unresolved。"),
+    ("policy_action", "Policy-dependent action, recorded separately from the verification "
+                      "outcome (allow / defer / deny / exclude), reusing the operator meanings in EVALUATION-STANDARD.md §2.2. / 策略动作，与结论分开，词表与规范一致。"),
+])
 
 BIAS_CONTROLS = [
     "multi-judge（多裁判）", "human anchoring（人类锚定）", "AB/BA ordering（顺序轮换）",
@@ -136,17 +195,46 @@ def validate(evidence: dict) -> list:
         if not isinstance(auth, dict):
             errors.append("'authorization' must be an object (authorization 必须是对象)")
         else:
-            if auth.get("result") not in AUTH_RESULTS:
-                errors.append("authorization.result must be one of verified/unresolved/rejected/quarantined"
-                              " (授权结果必须是四态之一)")
+            res = auth.get("result")
+            if res not in AUTH_RESULTS:
+                errors.append(
+                    "authorization.result must be one of verified/unresolved/rejected "
+                    "(v1.3: 'quarantined' is a policy action, not a verification outcome — "
+                    "record it in authorization.policy_action as 'hold')"
+                    " (授权结果必须是三态之一)")
             if not auth.get("reason"):
                 errors.append("authorization.reason is required (授权原因必填)")
+            code = auth.get("reason_code")
+            if code is None:
+                errors.append("authorization.reason_code is required"
+                              " (v1.3 起必填：机器可读原因码)")
+            elif code not in REASON_CODES:
+                errors.append("authorization.reason_code must be one of %s"
+                              % "/".join(REASON_CODES))
+            elif res in REASON_FOR_RESULT and code not in REASON_FOR_RESULT[res]:
+                errors.append("authorization.reason_code %r inconsistent with result %r "
+                              "(allowed: %s)"
+                              % (code, res, "/".join(REASON_FOR_RESULT[res])))
+            action = auth.get("policy_action")
+            if action is None:
+                errors.append("authorization.policy_action is required"
+                              " (v1.3 起必填：allow/defer/deny/exclude，见 EVALUATION-STANDARD.md §2.2)")
+            elif action not in POLICY_ACTIONS:
+                errors.append("authorization.policy_action must be one of %s"
+                              % "/".join(POLICY_ACTIONS))
     return errors
 
 
 def digest_of(text: str) -> str:
     """Stable sha256 digest for reproducibility (可复现性哈希)."""
     return hashlib.sha256(text.encode("utf-8")).hexdigest()[:16]
+
+
+def digest_of_canonical(obj) -> str:
+    """Canonical payload digest, exactly as written in EVALUATION-STANDARD.md §2.3
+    （规范 §2.3 原文约定的算法：排序键 + 紧凑分隔符 + ensure_ascii=False，取前 16 位）.
+    """
+    return digest_of(json.dumps(obj, sort_keys=True, separators=(",", ":"), ensure_ascii=False))
 
 
 def grade_domain(items: list) -> tuple:
@@ -184,6 +272,35 @@ def domain_failure_class(items: list) -> str:
     return worst
 
 
+def normalise_authorization(auth) -> "OrderedDict | None":
+    """Fixed key order so that key order in the input cannot change the digest
+    （固定键序，输入文件键序变化不影响摘要）."""
+    if not auth:
+        return None
+    return OrderedDict([
+        ("result", auth.get("result")),
+        ("reason_code", auth.get("reason_code")),
+        ("reason", auth.get("reason")),
+        ("relying_party_action", auth.get("relying_party_action", "")),
+        ("policy_action", auth.get("policy_action")),
+    ])
+
+
+def build_outcome(auth) -> "OrderedDict | None":
+    """Project the case-level outcome from the authorization dimension.
+    结论由授权维度投影而来，因此两者在结构上不可能互相矛盾。
+    """
+    if not auth:
+        return None
+    return OrderedDict([
+        ("verification", AUTH_TO_OUTCOME.get(auth.get("result"), "unresolved")),
+        ("reason_code", auth.get("reason_code")),
+        ("policy_dependent", True),
+        ("policy_action", auth.get("policy_action")),
+        ("relying_party_action", auth.get("relying_party_action", "")),
+    ])
+
+
 def conclude(evidence: dict, subject: str, evaluator: str = "LGD-Eval") -> dict:
     """Produce machine-readable conclusion（生成机器可读结论）."""
     domain_results = OrderedDict()
@@ -214,13 +331,16 @@ def conclude(evidence: dict, subject: str, evaluator: str = "LGD-Eval") -> dict:
         if FAIL_ORDER[r["failure_class"]] < FAIL_ORDER[overall_fc]:
             overall_fc = r["failure_class"]
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    auth = evidence.get("authorization")
+    auth = normalise_authorization(evidence.get("authorization"))
+    outcome = build_outcome(evidence.get("authorization"))
     payload = OrderedDict([
-        ("schema", "lgd-eval/conclusion/v1.2"),
+        ("schema", SCHEMA),
         ("subject", subject),
         ("evaluator", evaluator),
         ("timestamp", now),
+        ("outcome", outcome),
         ("verdict", verdict),
+        ("scopes", SCOPES),
         ("overall_failure_class", overall_fc),
         ("authorization", auth),
         ("no_composite_score", True),
@@ -229,9 +349,13 @@ def conclude(evidence: dict, subject: str, evaluator: str = "LGD-Eval") -> dict:
         ("reproducibility", {
             "open_rubric": True, "evidence_appendix": True, "response_window_days": 14,
             "correction_window_hours": 24, "machine_readable": True,
-            "payload_digest": digest_of(json.dumps(
-                OrderedDict([("domains", domain_results), ("authorization", auth)]),
-                ensure_ascii=False)),
+            "digest_covers": ["domains", "authorization", "outcome"],
+            "digest_convention": "sha256(json.dumps(obj, sort_keys=True, "
+                                 "separators=(\",\", \":\"), ensure_ascii=False))[:16] "
+                                 "— EVALUATION-STANDARD.md §2.3",
+            "payload_digest": digest_of_canonical(
+                OrderedDict([("domains", domain_results), ("authorization", auth),
+                             ("outcome", outcome)])),
         }),
     ])
     return payload
@@ -239,16 +363,23 @@ def conclude(evidence: dict, subject: str, evaluator: str = "LGD-Eval") -> dict:
 
 def to_markdown(c: dict) -> str:
     """Render conclusion as bilingual Markdown（渲染为双语 Markdown）."""
+    o = c.get("outcome") or {}
     lines = [
         "# LGD-Eval Assessment Conclusion / 评估结论",
         "",
         "- **Subject / 评估对象**: %s" % c["subject"],
         "- **Evaluator / 评估方**: %s" % c["evaluator"],
         "- **Timestamp / 时间戳**: %s" % c["timestamp"],
-        "- **Verdict / 总体判词**: %s" % c["verdict"],
+        "- **Outcome / 用例结论**: **%s** (reason `%s`; policy action `%s`)"
+        % (o.get("verification", "—"), o.get("reason_code", "—"), o.get("policy_action", "—")),
+        "- **Relying-party action / 依赖方动作**: %s" % o.get("relying_party_action", "—"),
+        "- **Evidence-coverage verdict / 覆盖度判词**: %s" % c["verdict"],
         "- **Overall failure class / 总体失败类**: %s" % c["overall_failure_class"],
         "- **No composite score / 无复合分**: True（域级独立评分，禁止复合）",
         "- **Bias controls / 偏倚控制**: %s" % ("; ".join(c["bias_controls"])),
+        "",
+        "> `verdict` 是六域覆盖度判词，不是用例结论；用例结论读 `outcome.verification`。",
+        "> `verdict` is six-domain evidence coverage, not a case outcome; read `outcome.verification`.",
         "",
         "## Domain-level results / 域级结果",
         "",
@@ -267,6 +398,7 @@ def to_markdown(c: dict) -> str:
               "- evidence appendix（证据附录）: True",
               "- response window（回应期）: 14 days / 24h corrections",
               "- machine-readable（机器可读）: True",
+              "- digest covers（摘要覆盖）: domains + authorization + outcome",
               "- payload digest（载荷摘要）: `%s`" % c["reproducibility"]["payload_digest"],
               "",
               "*Generated by LGD-Eval evidence-grader（由证据分级器生成）；结论受证据级别约束，欢迎独立复现。*",
@@ -307,85 +439,165 @@ DEMO = {
     },
     "authorization": {
         "result": "verified",
+        "reason_code": "none",
         "reason": "issuer listed in authoritative scope registry for this credential profile and claim type",
         "relying_party_action": "proceed per normal policy",
+        "policy_action": "allow",
     },
 }
 
 
 def run_selftest() -> int:
-    """Assertion tests（断言自检）: rule invariants + failure semantics."""
+    """Assertion tests（断言自检）: rule invariants + failure semantics.
+    断言数由计数器统计，打印的数字是真实执行的断言条数，不是手写的。
+    """
     errs = []
-    # 1. Validation catches bad grade / 校验捕获非法级别
+    n = [0]
+
+    def check(cond, msg):
+        n[0] += 1
+        if not cond:
+            errs.append(msg)
+
+    # --- 输入校验 ---
     bad = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "X"}]}}
-    if not validate(bad):
-        errs.append("selftest 1: bad grade not rejected")
-    # 2. Domain best-grade logic / 域级取最高
+    check(bool(validate(bad)), "1: bad grade not rejected")
+
+    # --- 域级取最高 ---
     items = [{"claim": "a", "grade": "M"}, {"claim": "b", "grade": "V"}, {"claim": "c", "grade": "S"}]
     best, _ = grade_domain(items)
-    if best != "V":
-        errs.append("selftest 2: best-grade logic failed (%s)" % best)
-    # 3. Empty domain -> Pending + unresolved / 空域 -> Pending 且 failure=unresolved
+    check(best == "V", "2: best-grade logic failed (%s)" % best)
+
+    # --- 空域 ---
     best2, _ = grade_domain([])
-    if best2 != "P":
-        errs.append("selftest 3: empty domain should be P")
-    if domain_failure_class([]) != "unresolved":
-        errs.append("selftest 3b: empty domain failure class should be unresolved")
-    # 4. Conclusion shape / 结论结构
+    check(best2 == "P", "3: empty domain should be P")
+    check(domain_failure_class([]) == "unresolved", "4: empty domain failure class should be unresolved")
+
+    # --- 结论结构 ---
     c = conclude(DEMO, DEMO["subject"])
-    if c["no_composite_score"] is not True:
-        errs.append("selftest 4: composite discipline broken")
-    if len(c["domains"]) != 6:
-        errs.append("selftest 5: domain count != 6")
-    if c["schema"] != "lgd-eval/conclusion/v1.2":
-        errs.append("selftest 5b: schema version not v1.2")
-    # 5. Deterministic digest / 摘要确定性
-    if digest_of("abc") != digest_of("abc"):
-        errs.append("selftest 6: digest not deterministic")
-    # 6. Failure semantics / 失败语义四态
-    if evidence_failure_class({"claim": "", "grade": "V"}) != "quarantined":
-        errs.append("selftest 7: missing claim should be quarantined")
-    if evidence_failure_class({"claim": "c", "grade": "P"}) != "rejected":
-        errs.append("selftest 8: grade P should be rejected")
-    if evidence_failure_class({"claim": "c", "grade": "S", "kind": "audit",
-                               "reproducible": False, "timestamped": False}) != "unresolved":
-        errs.append("selftest 9: verifiable kind without repro/ts should be unresolved")
-    if evidence_failure_class({"claim": "c", "grade": "L", "kind": "policy",
-                               "reproducible": False, "timestamped": False}) != "none":
-        errs.append("selftest 10: declarative kind should be none")
-    if "overall_failure_class" not in c or c["overall_failure_class"] != "none":
-        errs.append("selftest 11: overall failure class should be none for demo")
-    if "failure_class" not in c["domains"]["D4"] or c["domains"]["D4"]["failure_class"] != "none":
-        errs.append("selftest 12: D4 policy evidence failure class should be none")
-    # 13. Authorization validity dimension / 授权维度校验与透传
-    if c["schema"] != "lgd-eval/conclusion/v1.2":
-        errs.append("selftest 13: schema version not v1.2")
-    if not c.get("authorization") or c["authorization"].get("result") != "verified":
-        errs.append("selftest 13b: authorization validity not carried into conclusion")
+    check(c["no_composite_score"] is True, "5: composite discipline broken")
+    check(len(c["domains"]) == 6, "6: domain count != 6")
+    check(c["schema"] == SCHEMA, "7: schema version not %s" % SCHEMA)
+
+    # --- 摘要确定性 ---
+    check(digest_of("abc") == digest_of("abc"), "8: digest not deterministic")
+
+    # --- 失败语义四态 ---
+    check(evidence_failure_class({"claim": "", "grade": "V"}) == "quarantined",
+          "9: missing claim should be quarantined")
+    check(evidence_failure_class({"claim": "c", "grade": "P"}) == "rejected",
+          "10: grade P should be rejected")
+    check(evidence_failure_class({"claim": "c", "grade": "S", "kind": "audit",
+                                  "reproducible": False, "timestamped": False}) == "unresolved",
+          "11: verifiable kind without repro/ts should be unresolved")
+    check(evidence_failure_class({"claim": "c", "grade": "L", "kind": "policy",
+                                  "reproducible": False, "timestamped": False}) == "none",
+          "12: declarative kind should be none")
+    check(c["overall_failure_class"] == "none", "13: overall failure class should be none for demo")
+    check(c["domains"]["D4"]["failure_class"] == "none",
+          "14: D4 policy evidence failure class should be none")
+
+    # --- 授权维度透传 ---
+    check(bool(c.get("authorization")) and c["authorization"]["result"] == "verified",
+          "15: authorization validity not carried into conclusion")
     bad_auth = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "V"}]},
-                "authorization": {"result": "bogus", "reason": "r"}}
-    if not validate(bad_auth):
-        errs.append("selftest 13c: invalid authorization result not rejected")
-    # 14. B1 vs B2 separation / missing evidence of authorization ≠ demonstrated invalid authorization
+                "authorization": {"result": "bogus", "reason": "r",
+                                  "reason_code": "none", "policy_action": "allow"}}
+    check(bool(validate(bad_auth)), "16: invalid authorization result not rejected")
+
+    # --- v1.3：quarantined 不再是验证结论 ---
+    q_auth = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "V"}]},
+              "authorization": {"result": "quarantined", "reason": "spec undecided",
+                                "reason_code": "none", "policy_action": "exclude"}}
+    check(bool(validate(q_auth)),
+          "17: v1.3 must reject 'quarantined' as a verification outcome (it is a policy action)")
+    check("quarantined" not in AUTH_RESULTS, "17b: AUTH_RESULTS must not contain 'quarantined'")
+
+    # --- v1.3：reason_code 必填且必须与 result 自洽 ---
+    no_code = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "V"}]},
+               "authorization": {"result": "verified", "reason": "r", "policy_action": "allow"}}
+    check(bool(validate(no_code)), "18: missing reason_code not rejected")
+    mismatch = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "V"}]},
+                "authorization": {"result": "rejected", "reason": "r",
+                                  "reason_code": "none", "policy_action": "deny"}}
+    check(bool(validate(mismatch)), "19: reason_code inconsistent with result not rejected")
+    bad_action = {"subject": "x", "domains": {"D1": [{"claim": "c", "grade": "V"}]},
+                  "authorization": {"result": "verified", "reason": "r",
+                                    "reason_code": "none", "policy_action": "reject"}}
+    check(bool(validate(bad_action)),
+          "20: policy_action 'reject' not rejected (word reserved for the outcome vocabulary)")
+
+    # --- B1 vs B2 ---
     b1 = {"subject": "B1", "domains": {"D1": [{"claim": "sig", "grade": "V", "kind": "repro-test",
-                                                "reproducible": True, "timestamped": True}]},
-          "authorization": {"result": "unresolved", "reason": "scope info unavailable"}}
+                                               "reproducible": True, "timestamped": True}]},
+          "authorization": {"result": "unresolved", "reason": "scope info unavailable",
+                            "reason_code": "authorization_unresolved", "policy_action": "defer"}}
     b2 = {"subject": "B2", "domains": {"D1": [{"claim": "sig", "grade": "V", "kind": "repro-test",
-                                                "reproducible": True, "timestamped": True}]},
-          "authorization": {"result": "rejected", "reason": "scope registry confirms lack of scope"}}
+                                               "reproducible": True, "timestamped": True}]},
+          "authorization": {"result": "rejected", "reason": "scope registry confirms lack of scope",
+                            "reason_code": "authorization_rejected", "policy_action": "deny"}}
     c1, c2 = conclude(b1, "B1"), conclude(b2, "B2")
-    if c1["authorization"]["result"] != "unresolved" or c2["authorization"]["result"] != "rejected":
-        errs.append("selftest 14: B1/B2 authorization separation broken")
-    if c1["reproducibility"]["payload_digest"] == c2["reproducibility"]["payload_digest"]:
-        errs.append("selftest 14b: B1/B2 digests must differ (authorization enters digest)")
-    # 15. Digest determinism including authorization / 摘要确定性（含授权维度）
-    if conclude(b1, "B1")["reproducibility"]["payload_digest"] != c1["reproducibility"]["payload_digest"]:
-        errs.append("selftest 15: digest not deterministic with authorization")
+    check(c1["authorization"]["result"] == "unresolved" and c2["authorization"]["result"] == "rejected",
+          "21: B1/B2 authorization separation broken")
+    check(c1["reproducibility"]["payload_digest"] != c2["reproducibility"]["payload_digest"],
+          "22: B1/B2 digests must differ (authorization enters digest)")
+    check(c1["outcome"]["verification"] == "unresolved" and c2["outcome"]["verification"] == "rejected",
+          "23: B1/B2 case outcomes must differ")
+
+    # --- 摘要确定性（含授权维度）---
+    check(conclude(b1, "B1")["reproducibility"]["payload_digest"] == c1["reproducibility"]["payload_digest"],
+          "24: digest not deterministic with authorization")
+
+    # --- v1.3：结论字段存在且与覆盖度判词分离 ---
+    check(c["outcome"]["verification"] == "verified", "25: demo outcome should be 'verified'")
+    n_vs = sum(1 for r in c["domains"].values() if r["best_grade"] in ("V", "S"))
+    check(n_vs == 5 and c["verdict"] == "Partially evidenced（部分有据）",
+          "26: demo coverage should be 5/6 -> 'Partially evidenced' (got %d/6, %s)"
+          % (n_vs, c["verdict"]))
+    b1_v = conclude(b1, "B1")
+    check(b1_v["verdict"] == "Insufficient evidence（证据不足）" and b1_v["outcome"]["verification"] == "unresolved",
+          "27: coverage verdict and case outcome must be separable (B1: insufficient coverage, unresolved outcome)")
+
+    # --- v1.3：摘要覆盖 outcome；单改 policy_action 会改变摘要 ---
+    check(c["reproducibility"]["digest_covers"] == ["domains", "authorization", "outcome"],
+          "28: digest_covers must list domains/authorization/outcome")
+    b1b = json.loads(json.dumps(b1))
+    b1b["authorization"]["policy_action"] = "deny"
+    check(conclude(b1b, "B1")["reproducibility"]["payload_digest"] != c1["reproducibility"]["payload_digest"],
+          "29: changing policy_action alone must change the digest")
+
+    # --- v1.3：键序归一化（输入键序不影响摘要）---
+    shuffled = OrderedDict()
+    shuffled["subject"] = b1["subject"]
+    shuffled["authorization"] = OrderedDict(reversed(list(b1["authorization"].items())))
+    shuffled["domains"] = b1["domains"]
+    check(conclude(shuffled, "B1")["reproducibility"]["payload_digest"] == c1["reproducibility"]["payload_digest"],
+          "30: key order in input must not change the digest")
+
+    # --- v1.3：scopes 口径齐全 ---
+    check(all(k in c["scopes"] for k in ("outcome", "verdict", "overall_failure_class", "policy_action")),
+          "31: scopes must document outcome/verdict/overall_failure_class/policy_action")
+
+    # --- v1.3：摘要算法必须与 EVALUATION-STANDARD.md §2.3 逐字一致 ---
+    independent = hashlib.sha256(json.dumps(
+        OrderedDict([("domains", c["domains"]),
+                     ("authorization", c["authorization"]),
+                     ("outcome", c["outcome"])]),
+        sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()[:16]
+    check(c["reproducibility"]["payload_digest"] == independent,
+          "32: digest must equal the §2.3 convention computed independently")
+    check("§2.3" in c["reproducibility"].get("digest_convention", ""),
+          "33: reproducibility must state which digest convention is used")
+
+    # --- v1.3：处置词表 = 规范 §2.2 的四个词，一个不多一个不少 ---
+    check(POLICY_ACTIONS == ["allow", "defer", "deny", "exclude"],
+          "34: policy actions must be exactly the four operator meanings in §2.2")
+
     if errs:
         for e in errs:
             print("FAIL: %s" % e)
         return 1
-    print("SELFTEST OK — 15 invariants passed（15 项不变量全部通过）")
+    print("SELFTEST OK — %d invariants passed（%d 项不变量全部通过）" % (n[0], n[0]))
     return 0
 
 

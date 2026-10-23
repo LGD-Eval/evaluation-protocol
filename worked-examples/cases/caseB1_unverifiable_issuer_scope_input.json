@@ -22,7 +22,9 @@
   },
   "authorization": {
     "result": "unresolved",
+    "reason_code": "authorization_unresolved",
     "reason": "authoritative issuer-scope information unavailable at verification time; missing evidence of authorization is not demonstrated invalid authorization",
-    "relying_party_action": "do not rely on authorization; treat per risk policy (deny-open or manual review)"
+    "relying_party_action": "do not rely on authorization; treat per risk policy (deny-open or manual review)",
+    "policy_action": "defer"
   }
 }

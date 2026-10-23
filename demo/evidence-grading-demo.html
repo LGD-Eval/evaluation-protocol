@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Evidence Grading for Verifier Decisions — Interactive Demo</title>
-<meta name="description" content="Interactive demo of evidence grading separated from authorization validity: three worked cases, machine-runnable, externally verified. LGD-Eval.">
+<meta name="description" content="Interactive demo of evidence grading separated from authorization validity: four worked cases, machine-runnable, externally verified. LGD-Eval.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230F1E2E'/%3E%3Ctext x='16' y='22' font-size='14' text-anchor='middle' fill='%23B8894A' font-family='serif' font-weight='bold'%3EL%3C/text%3E%3C/svg%3E">
 <style>
 :root{
@@ -49,7 +49,8 @@ h2 .en{color:var(--gray);font-weight:400;font-size:13px;margin-left:8px}
 .ev .lbl{min-width:24px;font-weight:700;color:var(--gold)}
 .ev .src{color:var(--gray);font-size:12px;font-style:italic}
 .tag{display:inline-block;font-size:11px;border-radius:6px;padding:1px 7px;background:#EFEAE1;color:var(--ink2);margin-left:6px}
-.verdict{font-size:17px;font-weight:800;margin:4px 0}
+.outcome{font-size:14px;font-weight:700;margin:6px 0 2px;color:#0F1E2E}
+.outcome code{font-family:Consolas,monospace;font-size:12px;background:#EFEAE1;padding:1px 5px;border-radius:4px}.verdict{font-size:17px;font-weight:800;margin:4px 0}
 .v-insufficient{color:var(--red)}
 .fclass{font-family:Consolas,monospace;font-size:13px;background:#EFEAE1;border-radius:6px;padding:2px 8px}
 table{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
@@ -72,7 +73,7 @@ a{color:var(--blue)}
   <div class="wrap">
     <div class="brand">LGD-Eval · Independent AI Evaluation</div>
     <h1>Evidence Grading for Verifier Decisions</h1>
-    <div class="sub">Separating evidence quality from authorization validity — three worked cases, machine-runnable, externally verified.</div>
+    <div class="sub">Separating evidence quality from authorization validity — four worked cases, machine-runnable, externally verified.</div>
   </div>
 </header>
 
@@ -98,11 +99,12 @@ a{color:var(--blue)}
     </div>
   </div>
 
-  <h2>Worked cases <span class="en">Click to inspect input evidence and verdict</span></h2>
+  <h2>Worked cases <span class="en">Click to inspect input evidence, outcome and coverage verdict</span></h2>
   <div class="card">
     <div class="cases" id="cases">
       <button class="casebtn on" data-c="A"><b>Case A</b> — Valid registered credential<small>Authorized registrar, governance root</small><span class="dg" data-dg="A"></span></button>
-      <button class="casebtn" data-c="B"><b>Case B</b> — Out-of-scope issuer<small>Signature valid, authorization unverifiable</small><span class="dg" data-dg="B"></span></button>
+      <button class="casebtn" data-c="B1"><b>Case B1</b> — Unverifiable issuer scope<small>Signature valid, scope registry unavailable</small><span class="dg" data-dg="B1"></span></button>
+      <button class="casebtn" data-c="B2"><b>Case B2</b> — Confirmed out-of-scope issuer<small>Signature valid, registry confirms no scope</small><span class="dg" data-dg="B2"></span></button>
       <button class="casebtn" data-c="C"><b>Case C</b> — Status source unavailable<small>No revocation record retrievable</small><span class="dg" data-dg="C"></span></button>
     </div>
     <div class="split">
@@ -112,6 +114,7 @@ a{color:var(--blue)}
       </div>
       <div class="panel">
         <h4>Verifier conclusion</h4>
+        <div class="outcome" id="outcome"></div>
         <div class="verdict v-insufficient" id="verdict"></div>
         <div id="fclass"></div>
         <div id="domains"></div>
@@ -140,19 +143,21 @@ a{color:var(--blue)}
 
   <h2>Reproduction <span class="en">clone → run → verify, from a clean checkout</span></h2>
   <div class="card">
-    <p style="font-size:13px;margin-bottom:10px">External verification performed 2026-10-16 on a fresh download of the public repository (no local configuration used):</p>
-    <div class="okbar">SELFTEST PASS — 12 invariants · 3/3 cases match published payload digests</div>
+    <p style="font-size:13px;margin-bottom:10px">Reproduction run of 2026-10-23 (v1.3): fresh download of the public repository, no local configuration used. Independent reproduction by a third party is what this output is for — the run below was made by the maintainers, and every number in it can be recomputed from the repository alone.</p>
+    <div class="okbar">SELFTEST PASS — 35 invariants · 4/4 cases match published payload digests</div>
     <div class="repro">$ python tools/evidence-grader.py --selftest
-SELFTEST OK — 12 invariants passed（12 项不变量全部通过）
+SELFTEST OK — 35 invariants passed（35 项不变量全部通过）
 
-$ python tools/evidence-grader.py --json worked-examples/cases/caseA_valid_registered_credential_input.json --out /tmp/caseA.json
-$ python tools/evidence-grader.py --json worked-examples/cases/caseB_out_of_scope_issuer_input.json --out /tmp/caseB.json
-$ python tools/evidence-grader.py --json worked-examples/cases/caseC_unavailable_status_source_input.json --out /tmp/caseC.json
+$ for c in caseA_valid_registered_credential caseB1_unverifiable_issuer_scope \
+           caseB2_confirmed_out_of_scope_issuer caseC_unavailable_status_source; do
+    python tools/evidence-grader.py --json worked-examples/cases/${c}_input.json --out /tmp/${c}.json
+  done
 
-re-generated payload digests vs published:
-  caseA  edc9b6fafba9ccf4  <span class="ok">MATCH</span>
-  caseB  995eba87beff6e7a  <span class="ok">MATCH</span>
-  caseC  faaf76277c4ac390  <span class="ok">MATCH</span></div>
+re-generated payload digests vs published (digest convention: EVALUATION-STANDARD.md §2.3):
+  caseA   fa8b1420cca29307  <span class="ok">MATCH</span>
+  caseB1  a353ad64f911030a  <span class="ok">MATCH</span>
+  caseB2  d709c4ec85ef5d6e  <span class="ok">MATCH</span>
+  caseC   982c390107058485  <span class="ok">MATCH</span></div>
     <p style="font-size:12px;color:var(--gray);margin-top:12px">
       Repository: <a href="https://github.com/LGD-Eval/evaluation-protocol" target="_blank" rel="noopener">github.com/LGD-Eval/evaluation-protocol</a> ·
       Examples: <a href="https://github.com/LGD-Eval/evaluation-protocol/tree/main/worked-examples/cases" target="_blank" rel="noopener">worked-examples/cases</a> ·
@@ -166,35 +171,233 @@ re-generated payload digests vs published:
 
 <script>
 var DATA = {
-  A: {
-    verdict: "Insufficient evidence（证据不足）",
-    fclass: "unresolved",
-    digest: "edc9b6fafba9ccf4",
-    ev: [
-      {d:"D1", g:"V", claim:"Registration credential issued by registrar authorized under a governance root", kind:"audit", src:"frozen test vector T-A1 + independent replay"},
-      {d:"D1", g:"V", claim:"Registrar scope verified: resource within declared registration domain", kind:"repro-test", src:"frozen test vector T-A2 + independent replay"},
-      {d:"D2", g:"V", claim:"Credential status current: no revocation, suspension or expiry at verification time", kind:"process", src:"signed status response, frozen vector T-A3"}
+  "A": {
+    "outcome": "verified",
+    "reason": "none",
+    "policy": "allow",
+    "rpa": "proceed per normal policy",
+    "verdict": "Insufficient evidence（证据不足）",
+    "fclass": "unresolved",
+    "digest": "fa8b1420cca29307",
+    "ev": [
+      {
+        "d": "D1",
+        "g": "V",
+        "claim": "Registration credential issued by registrar authorized under a governance root",
+        "kind": "audit",
+        "src": "frozen test vector T-A1 + independent replay"
+      },
+      {
+        "d": "D1",
+        "g": "V",
+        "claim": "Registrar scope verified: resource within declared registration domain",
+        "kind": "repro-test",
+        "src": "frozen test vector T-A2 + independent replay"
+      },
+      {
+        "d": "D2",
+        "g": "V",
+        "claim": "Credential status current: no revocation, suspension or expiry at verification time",
+        "kind": "process",
+        "src": "signed status response, frozen vector T-A3"
+      }
     ],
-    dom: [["D1","V","Verified"],["D2","V","Verified"],["D3","P","Pending"],["D4","P","Pending"],["D5","P","Pending"],["D6","P","Pending"]]
+    "dom": [
+      [
+        "D1",
+        "V",
+        "Verified"
+      ],
+      [
+        "D2",
+        "V",
+        "Verified"
+      ],
+      [
+        "D3",
+        "P",
+        "Pending"
+      ],
+      [
+        "D4",
+        "P",
+        "Pending"
+      ],
+      [
+        "D5",
+        "P",
+        "Pending"
+      ],
+      [
+        "D6",
+        "P",
+        "Pending"
+      ]
+    ]
   },
-  B: {
-    verdict: "Insufficient evidence（证据不足）",
-    fclass: "unresolved",
-    digest: "995eba87beff6e7a",
-    ev: [
-      {d:"D1", g:"V", claim:"Credential signature cryptographically valid", kind:"repro-test", src:"signature replay on frozen vector T-B1"},
-      {d:"D1", g:"L", claim:"Issuer authorized for this credential profile and claim type", kind:"audit", src:"issuer self-declaration only; scope registry entry unavailable"}
+  "B1": {
+    "outcome": "unresolved",
+    "reason": "authorization_unresolved",
+    "policy": "defer",
+    "rpa": "do not rely on authorization; treat per risk policy (deny-open or manual review)",
+    "verdict": "Insufficient evidence（证据不足）",
+    "fclass": "unresolved",
+    "digest": "a353ad64f911030a",
+    "ev": [
+      {
+        "d": "D1",
+        "g": "V",
+        "claim": "Credential signature cryptographically valid",
+        "kind": "repro-test",
+        "src": "signature replay on frozen vector T-B1"
+      },
+      {
+        "d": "D1",
+        "g": "L",
+        "claim": "Issuer authorized for this credential profile and claim type",
+        "kind": "audit",
+        "src": "issuer self-declaration only; authoritative scope registry entry unavailable at verification time"
+      }
     ],
-    dom: [["D1","V","Verified (but unresolved) "],["D2","P","Pending"],["D3","P","Pending"],["D4","P","Pending"],["D5","P","Pending"],["D6","P","Pending"]]
+    "dom": [
+      [
+        "D1",
+        "V",
+        "Verified"
+      ],
+      [
+        "D2",
+        "P",
+        "Pending"
+      ],
+      [
+        "D3",
+        "P",
+        "Pending"
+      ],
+      [
+        "D4",
+        "P",
+        "Pending"
+      ],
+      [
+        "D5",
+        "P",
+        "Pending"
+      ],
+      [
+        "D6",
+        "P",
+        "Pending"
+      ]
+    ]
   },
-  C: {
-    verdict: "Insufficient evidence（证据不足）",
-    fclass: "unresolved",
-    digest: "faaf76277c4ac390",
-    ev: [
-      {d:"D2", g:"L", claim:"Credential status current (not revoked)", kind:"audit", src:"status endpoint unreachable at verification time; no revocation record retrievable"}
+  "B2": {
+    "outcome": "rejected",
+    "reason": "authorization_rejected",
+    "policy": "deny",
+    "rpa": "do not accept the credential for this operation; treat as unauthorized",
+    "verdict": "Insufficient evidence（证据不足）",
+    "fclass": "unresolved",
+    "digest": "d709c4ec85ef5d6e",
+    "ev": [
+      {
+        "d": "D1",
+        "g": "V",
+        "claim": "Credential signature cryptographically valid",
+        "kind": "repro-test",
+        "src": "signature replay on frozen vector T-B2a"
+      },
+      {
+        "d": "D1",
+        "g": "V",
+        "claim": "Issuer lacks required scope for this credential profile and claim type",
+        "kind": "audit",
+        "src": "authoritative scope registry consulted at verification time; issuer not listed for this profile (frozen vector T-B2b)"
+      }
     ],
-    dom: [["D1","P","Pending"],["D2","L","Limited"],["D3","P","Pending"],["D4","P","Pending"],["D5","P","Pending"],["D6","P","Pending"]]
+    "dom": [
+      [
+        "D1",
+        "V",
+        "Verified"
+      ],
+      [
+        "D2",
+        "P",
+        "Pending"
+      ],
+      [
+        "D3",
+        "P",
+        "Pending"
+      ],
+      [
+        "D4",
+        "P",
+        "Pending"
+      ],
+      [
+        "D5",
+        "P",
+        "Pending"
+      ],
+      [
+        "D6",
+        "P",
+        "Pending"
+      ]
+    ]
+  },
+  "C": {
+    "outcome": "unresolved",
+    "reason": "status_unavailable",
+    "policy": "defer",
+    "rpa": "do not treat as revoked; do not treat as valid; escalate",
+    "verdict": "Insufficient evidence（证据不足）",
+    "fclass": "unresolved",
+    "digest": "982c390107058485",
+    "ev": [
+      {
+        "d": "D2",
+        "g": "L",
+        "claim": "Credential status current (not revoked)",
+        "kind": "audit",
+        "src": "status endpoint unreachable at verification time; no revocation record retrievable"
+      }
+    ],
+    "dom": [
+      [
+        "D1",
+        "P",
+        "Pending"
+      ],
+      [
+        "D2",
+        "L",
+        "Limited"
+      ],
+      [
+        "D3",
+        "P",
+        "Pending"
+      ],
+      [
+        "D4",
+        "P",
+        "Pending"
+      ],
+      [
+        "D5",
+        "P",
+        "Pending"
+      ],
+      [
+        "D6",
+        "P",
+        "Pending"
+      ]
+    ]
   }
 };
 function gc(g){return '<span class="g g'+g+'">'+g+'</span>'}
@@ -203,7 +406,8 @@ function render(c){
   var ev='';
   d.ev.forEach(function(e){ ev+='<div class="ev"><div class="row">'+gc(e.g)+'<span><b>'+e.claim+'</b><span class="tag">'+e.d+' · '+e.kind+'</span></span></div><div class="row"><span class="lbl"></span><span class="src">'+e.src+'</span></div></div>'; });
   document.getElementById('evlist').innerHTML=ev;
-  document.getElementById('verdict').textContent=d.verdict;
+  document.getElementById('outcome').innerHTML='verification outcome: <b>'+d.outcome+'</b> · reason <code>'+d.reason+'</code> · policy action <b>'+d.policy+'</b>';
+  document.getElementById('verdict').textContent='coverage verdict (D1–D6): '+d.verdict;
   document.getElementById('fclass').innerHTML='<span class="fclass">failure class: '+d.fclass+'</span>';
   var rows='<table><thead><tr><th>Domain</th><th>Best grade</th><th>Interpretation</th></tr></thead><tbody>';
   d.dom.forEach(function(r){ rows+='<tr><td>'+r[0]+'</td><td>'+gc(r[1])+'</td><td>'+r[2]+'</td></tr>'; });
