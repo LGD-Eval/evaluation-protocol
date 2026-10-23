@@ -165,7 +165,7 @@
 
 ## Appendix A — Reproduction from live runs / 附录 A：实测复现对照
 
-The following four cases were executed with the reference grader (`evaluation-protocol/tools/evidence-grader.py` v1.3, SHA-256 `74CEB2B8266478014BB5953DC63534CF68B12BC08721162A889E1E0175A7B74B`); machine-readable outputs with payload digests are in `worked-examples/cases/` and `tools/demo/`. They illustrate L0–L2 judgment in practice and are offered as optional evaluation aid. / 以下用例已用参考分级器 v1.3 实跑（输出含 payload digest，位于 `worked-examples/cases/` 与 `tools/demo/`），用于演示 L0–L2 的判定实践，仅作可选评估辅助。
+The following four cases were executed with the reference grader (`evaluation-protocol/tools/evidence-grader.py` v1.3, SHA-256 `06C89E1BA30E4C331058AB90511B6DEA62D8641A8AB15D284BCAFD4005925098` (computed over the server-side LF bytes, 34795 B)); machine-readable outputs with payload digests are in `worked-examples/cases/` and `tools/demo/`. They illustrate L0–L2 judgment in practice and are offered as optional evaluation aid. / 以下用例已用参考分级器 v1.3 实跑（输出含 payload digest，位于 `worked-examples/cases/` 与 `tools/demo/`），用于演示 L0–L2 的判定实践，仅作可选评估辅助。
 
 | Case / 用例 | Scenario / 场景 | Judgment / 判定 | Outcome / 结果 |
 |---|---|---|---|

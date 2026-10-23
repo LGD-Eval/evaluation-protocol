@@ -1,6 +1,6 @@
 # Worked Examples — Four Implementation-Neutral Cases
 
-Machine-readable conclusions and reproduction inputs for the cases discussed in [FG-TIDA/use-cases#27](https://github.com/FG-TIDA/use-cases/issues/27), generated with the reference tool `tools/evidence-grader.py` (v1.3, SHA-256 `74CEB2B8266478014BB5953DC63534CF68B12BC08721162A889E1E0175A7B74B`, Apache-2.0).
+Machine-readable conclusions and reproduction inputs for the cases discussed in [FG-TIDA/use-cases#27](https://github.com/FG-TIDA/use-cases/issues/27), generated with the reference tool `tools/evidence-grader.py` (v1.3, SHA-256 `06C89E1BA30E4C331058AB90511B6DEA62D8641A8AB15D284BCAFD4005925098` (computed over the server-side LF bytes, 34795 B), Apache-2.0).
 
 The former "Case B — Out-of-scope issuer" has been split into **B1** and **B2** per the [themes#42 review](https://github.com/FG-TIDA/themes/issues/42): missing evidence of authorization (B1, `unresolved`) must never be treated as equivalent to demonstrated invalid authorization (B2, `rejected`).
 
