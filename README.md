@@ -2,7 +2,7 @@
 
 > 隶属：凡自治之物 · LGD 治理学（Lifecycle Governance Doctrine）· 创造术家族
 > 角色：LGD-Eval 评测线 · 中立第三方
-> 官方英文：Evidence-Gated AI Lifecycle Governance
+> 官方英文：Lifecycle Governance Doctrine
 > 许可证：CC BY 4.0
 
 ## 本仓内容
