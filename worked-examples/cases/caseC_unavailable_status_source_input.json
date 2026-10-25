@@ -14,7 +14,9 @@
   },
   "authorization": {
     "result": "unresolved",
+    "reason_code": "status_unavailable",
     "reason": "status source unreachable at verification time; unavailable status does not equal revoked",
-    "relying_party_action": "do not treat as revoked; do not treat as valid; escalate"
+    "relying_party_action": "do not treat as revoked; do not treat as valid; escalate",
+    "policy_action": "defer"
   }
 }

@@ -22,7 +22,9 @@
   },
   "authorization": {
     "result": "rejected",
+    "reason_code": "authorization_rejected",
     "reason": "authoritative scope registry confirms the issuer lacks the required scope for this credential profile and claim type",
-    "relying_party_action": "do not accept the credential for this operation; treat as unauthorized"
+    "relying_party_action": "do not accept the credential for this operation; treat as unauthorized",
+    "policy_action": "deny"
   }
 }
