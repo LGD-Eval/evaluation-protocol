@@ -15,8 +15,15 @@ import sys
 
 sys.path.insert(0, r"D:\doubao\ls-proto\prototypes\openai-agent-trust-runtime\src")
 
-from ls_agent_trust import TrustRuntime, TrustViolation  # noqa: E402
-from ls_agent_trust.openai_demo import bounded_authority  # noqa: E402
+try:
+    from ls_agent_trust import TrustRuntime, TrustViolation  # noqa: E402
+    from ls_agent_trust.openai_demo import bounded_authority  # noqa: E402
+    _HAVE_TRUST = True
+    _IMP_ERR = None
+except ImportError as _err:
+    # 外部依赖缺失时优雅跳过，而非抛出回溯使 CI 误红（red-team finding P1）
+    _HAVE_TRUST = False
+    _IMP_ERR = _err
 
 
 def scenario(name: str, fn) -> dict:
@@ -48,6 +55,10 @@ def completed_dispatch(runtime, child, scope):
 
 
 def main() -> None:
+    if not _HAVE_TRUST:
+        print("SKIP attack_vectors: 缺少外部依赖 ls_agent_trust (%s)。" % _IMP_ERR)
+        print("      安装 LS Agent Trust Runtime（openai-agent-trust-runtime）后方可运行本独立评审脚本。")
+        sys.exit(2)
     results: list[dict] = []
 
     # --- Attack scenario 1: submit as an agent other than the dispatched child ---
