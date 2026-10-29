@@ -1,0 +1,31 @@
+{
+  "subject": "Case B2 — Confirmed out-of-scope issuer, signature valid (FG-TIDA/use-cases#27; per themes#42 review, former Case B split into B1/B2)",
+  "domains": {
+    "D1": [
+      {
+        "claim": "Credential signature cryptographically valid",
+        "grade": "V",
+        "kind": "repro-test",
+        "source": "signature replay on frozen vector T-B2a",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "claim": "Issuer lacks required scope for this credential profile and claim type",
+        "grade": "V",
+        "kind": "audit",
+        "source": "authoritative scope registry consulted at verification time; issuer not listed for this profile (frozen vector T-B2b)",
+        "reproducible": true,
+        "timestamped": true
+      }
+    ]
+  },
+  "authority_basis": {
+    "question": "what makes the negative response authoritative for the relevant scope, time and federation relationships",
+    "authority_source": "the scope registry designated as authoritative for this credential profile and claim type; its consultation is recorded as frozen vector T-B2b, so the input is reproducible without network access",
+    "scope_of_authority": "issuer scope for this credential profile and claim type only; the registry response is evidence about that scope and about nothing else",
+    "time_basis": "the consultation is fixed at the verification instant of the frozen vector; staleness of that response is exactly what rule R6 of a composition layer would have to assess",
+    "federation_basis": "the input records one registry as the consulted source; which registry governs when several could apply, and how cross-federation answers are combined, is deliberately left for each implementation to declare — that declaration is part of what this case asks an implementer to state",
+    "residual_limit": "the input supplies the basis as recorded evidence; it does not certify the registry itself — auditing the registry's own authority is out of scope for this case"
+  }
+}
