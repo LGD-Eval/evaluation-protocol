@@ -7,6 +7,25 @@
 > 官方英文：Lifecycle Governance Doctrine
 > 许可证：CC BY 4.0
 
+## Quickstart · 一条命令复现四个已发布用例结论
+
+```bash
+python demo/run_worked_examples.py
+```
+
+Runs the evidence grader (`tools/evidence-grader.py`, v1.3) over the four
+worked examples (A / B1 / B2 / C) and checks the case outcome
+(`verification` / `reason_code` / `policy_action`) and the `payload_digest`
+against the published expected outcomes — bit-for-bit, zero dependencies,
+Python 3.8+.
+
+对四个已发布用例（FG-TIDA/use-cases#27）做一条命令回归：跑评分器、对账用例结论与
+payload 摘要，逐位复现，零第三方依赖。预期输出 `4/4 PASS`。
+
+Self-test（评分器内置自检）: `python tools/evidence-grader.py --selftest`
+Interactive demo: `python tools/evidence-grader.py --demo`
+
+
 ## 本仓内容
 - **测试专家手册.md**：评测协议正文 —— L0-L13 判据谱系、验证方法学、不自查原则
 - **AGENTS.md**：AI 协作入口
