@@ -19,7 +19,7 @@ worked examples (A / B1 / B2 / C) and checks the case outcome
 against the published expected outcomes — bit-for-bit, zero dependencies,
 Python 3.8+.
 
-对四个已发布用例（FG-TIDA/use-cases#27）做一条命令回归：跑评分器、对账用例结论与
+对四个已发布用例（FG-TIDA/themes#42）做一条命令回归：跑评分器、对账用例结论与
 payload 摘要，逐位复现，零第三方依赖。预期输出 `4/4 PASS`。
 
 Self-test（评分器内置自检）: `python tools/evidence-grader.py --selftest`
