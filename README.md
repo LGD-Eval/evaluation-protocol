@@ -1,7 +1,5 @@
 # Evaluation Protocol · 评测协议
 
-[![Auto Eval: LGD + OpenSSF](https://github.com/LGD-Eval/evaluation-protocol/actions/workflows/auto-eval.yml/badge.svg)](https://github.com/LGD-Eval/evaluation-protocol/actions/workflows/auto-eval.yml)
-
 > **门户 / Portal:** [LGD Hub · 生态超市入口](https://zhaoxinghua09-cell.github.io/lgd-hub/) ｜ LGD 生态（Lifecycle Governance Doctrine）
 
 > 隶属：凡自治之物 · LGD 治理学（Lifecycle Governance Doctrine）· 创造术家族
