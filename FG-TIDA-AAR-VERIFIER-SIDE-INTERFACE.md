@@ -7,7 +7,7 @@
 | Author | Xinghua Zhao (Steven Zhao), independent expert, GitHub `@zhaoxinghua09-cell` |
 | Offered in | Individual-expert capacity, as stated on `FG-TIDA/themes#46` on 29 October 2026 |
 | Hosted in | `LGD-Eval/evaluation-protocol` — the public home of the evaluation material this record draws on. Hosting is a publication venue, not an authorship claim; the account relationship is linked in §9. |
-| Version | 0.3 — 16 November 2026 |
+| Version | 0.4 — 16 November 2026 |
 | Status | Draft for attributed review before the first in-person FG-TIDA meeting (Paris, 30 November – 1 December 2026) |
 | Linked work item | AAR-REQ 0.2 — https://tyche-dev.github.io/tida-aar-req/ |
 | Licence | CC BY 4.0 |
@@ -20,7 +20,7 @@
 
 **Verifier.** The relying party itself, or an agent acting for it, when it evaluates a record and states a result. This record introduces no second role: wherever AAR-REQ binds a relying party, the obligation falls on the verifier, and the name is used because these clauses are about the act of verifying rather than the act of relying.
 
-**Record-side and verifier-side.** Record-side requirements constrain what a record must carry. Verifier-side requirements constrain what a party must state when it reports a result from a record. R1–R8 are record-side; the clauses below are verifier-side.
+**Record-side, rejection-side, accept-side.** R3–R8 constrain what a record must carry. R1–R4 constrain what a relying party reports **when it rejects**. Neither constrains what it reports when it accepts — that is the subject of the clauses below.
 
 **Source.** A party, register or artefact against which a check can be run **without taking the producer's word for the result**. The record is the object checked, not a source: reading it establishes what it says, not whether what it says is true. This definition matters because it is the only thing standing between a verification and a recital.
 
@@ -56,7 +56,7 @@ Neither says **what was checked** or **within what boundary** — R7 regulates h
 
 ## 4. Conformance language
 
-Where a clause says the verifier **states**, **reports**, **names** or **carries**, that is **SHALL** for any report presented as a pass, and **SHOULD** for any report presented as unresolved. The consequence of omission is stated once, here: a report that omits a required statement cannot be assessed by the next party above the level that party can establish without it, which under VR1 is "not performed, no source" — the lowest pair. Two further consequences follow from the clauses themselves rather than from this section: an asserted check cannot support a pass (VR3), and a pass whose boundary is undeclared cannot be withdrawn and therefore cannot be relied on (VR3).
+Every clause statement about what the verifier does — **states**, **reports**, **names**, **carries**, **says** — is **SHALL** for any report presented as a pass, and **SHOULD** for one presented as unresolved. Where a required statement is omitted, the next party cannot assess the report above the pair "not performed, against none", which is the lowest pair under the within-component order in VR1. Two further consequences follow from the clauses themselves rather than from this section: an asserted check cannot support a pass (VR3), and a pass whose boundary is undeclared cannot be withdrawn and therefore cannot be relied on (VR3).
 
 ## 5. The clauses
 
@@ -64,7 +64,7 @@ Attribution follows AAR-REQ Table 2.1: each clause names who proposed it and, in
 
 ### VR1 — Each check is reported by who performed it and against what
 
-*Proposed by @zhaoxinghua09-cell. The separation of evidence quality from authorization validity is `FG-TIDA/themes#42`'s argument, restated in `#43` as LGD-Eval with @dakleyer's refinements; this clause applies it to the AAR case and does not claim the argument.*
+*Proposed by @zhaoxinghua09-cell. The separation of evidence quality from authorization validity is `FG-TIDA/themes#42`'s argument, restated in `#43`, published under the LGD-Eval account, with @dakleyer's refinements; this clause applies it to the AAR case and does not claim the argument.*
 
 A record can be complete and still support nothing, because what a report supports depends on what the verifier did and what it did it against. Both parts are reported, as a pair — not as a single rank:
 
@@ -73,7 +73,15 @@ A record can be complete and still support nothing, because what a report suppor
 | **Performed by** | the verifier / a named party / not performed (asserted) |
 | **Against** | source (per §0) / corroborated material, not at source / none |
 
-Nine combinations, each nameable, and no ordering is claimed between them. That is deliberate: an ordering would have to decide, for instance, whether a named party's check against source outranks the verifier's own check against corroborating material, and any answer to that is a policy choice the group has not made (open question 1).
+The values do not combine freely: where nothing was performed there is nothing to check against, so "not performed" pairs only with "none". The pairs that can occur are five:
+
+- performed by the verifier, against source;
+- performed by the verifier, against corroborated material;
+- performed by a named party, against source;
+- performed by a named party, against corroborated material;
+- not performed, against none.
+
+**No order is claimed between the pairs.** The values within each component are ordered — performed before not performed, source before corroborated before none — and that within-component order is the only one used below. Ordering the pairs against each other would have to decide, for instance, whether a named party's check against source outranks the verifier's own check against corroborating material, and any answer to that is a policy choice the group has not made (open question 1).
 
 Two points about what the pair does **not** say:
 
@@ -111,7 +119,7 @@ A pass carries four statements, and is incomplete without any of them:
 
 A pass then means no more than this: *no violation was found within this stated boundary, using these checks, at this moment.* It does not mean the act was authorized, that the record is true, or that the delegation was sound. AAR-REQ says as much one level down — "R7 does not make a claim true" — and the same restraint holds at the verdict.
 
-**A pass also has a floor.** At least one reported check must be performed, against source. Without the floor, a report in which every check was corroborated or asserted could state all four things and present itself as a pass — and nothing in the report would distinguish it from a report in which something was actually checked. The floor is why corroboration is weaker than source in VR1: corroboration alone cannot carry a pass, because it cannot establish that the evidence is independent of the producer.
+**A pass also has a floor.** At least one reported check must be performed, against source. Without the floor, a report in which every check was corroborated or asserted could state all four things and present itself as a pass — and nothing in the report would distinguish it from a report in which something was actually checked. The same property that makes corroboration weaker than source in VR1 is what keeps it from carrying a pass: corroboration cannot establish that the evidence is independent of the producer.
 
 The floor is what makes a pass **withdrawable by its own declaration**: a later party can withdraw it by showing one check inside the declared boundary that was not performed as reported, without relitigating the facts. A pass that declares no boundary cannot be withdrawn that way, and therefore cannot be relied on — only believed.
 
@@ -162,7 +170,7 @@ What the verifier reads from each record-side clause, and what it reports in ret
 - AAR-REQ 0.2, web — https://tyche-dev.github.io/tida-aar-req/
 - AAR-REQ 0.2, PDF — https://tyche-dev.github.io/tida-aar-req/specification.pdf
 - Originating thread — https://github.com/FG-TIDA/themes/issues/46
-- Verifier-side charter — https://github.com/FG-TIDA/themes/pull/28
+- Verifier-side charter, for the theme from #27 — https://github.com/FG-TIDA/themes/pull/28
 - Evidence grading, separating evidence quality from authorization validity — https://github.com/FG-TIDA/themes/issues/42
 - Evidence-graded authorization verdicts — https://github.com/FG-TIDA/themes/issues/43
 - Independence between references — https://github.com/FG-TIDA/themes/issues/60
@@ -179,7 +187,7 @@ What the verifier reads from each record-side clause, and what it reports in ret
 - **No consequence semantics beyond §4.** The clauses say what a report must state and what the next party can do without it. They do not say what happens to a verifier that states nothing; that is AAR-REQ's conformance question, which §1.3 moves elsewhere.
 - **No implementation accompanies this version.** The reference implementation covers the evidence-gated state machine, not the report format these clauses describe.
 - **The material this record draws on has not been through peer review.** `FG-TIDA/themes#42` and `#43` are proposals under discussion, and VR1 restates their separation argument rather than providing independent evidence for it.
-- **Drafted with AI assistance** under author direction, and red-teamed twice before posting; the author is responsible for every claim above.
+- **Drafted with AI assistance** under author direction, and red-teamed in three independent passes before posting; the author is responsible for every claim above.
 
 ## 11. Version history
 
@@ -205,3 +213,4 @@ What the verifier reads from each record-side clause, and what it reports in ret
 | **VR4** | 验证方的报告一旦被下一方依赖，就是被携带的主张，R7 按其自身条款即已适用（归属／时刻／防篡改）。本文**不扩张** R7，只指出它本来就够得着；不披露自身依据的验证方，产出的是一份下一方无法评到最低一档以上的主张。这不是要求公开，是说未公开的代价由下一方承担。 |
 
 **三个边界情形。** A：记录可读但无可对源——按地板判「边界内未决」，既不是通过也不是拒绝（R1–R4 无对应类，属类集缺口，开放问题 3）。B：记录对、时刻错——把时刻③的结论当时刻①报，正是 VR2 要挡的。C：无记录 ≠ 静默——「没有记录」「有界检索查无」「引用已确立」三种结论，只有第二种带检索范围和作者。
+| 0.4 | 2026-11-16 | R1–R8 split into rejection-side (R1–R4) and record-side (R3–R8) so the accept side is defined negatively and accurately; the five occurrable VR1 pairs enumerated, with a within-component order stated and no order between pairs; §4 conformance language extended to every obligation verb and its "stated once" claim removed |
