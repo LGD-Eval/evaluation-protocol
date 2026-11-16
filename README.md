@@ -10,6 +10,8 @@
 ## Quickstart · 一条命令复现四个已发布用例结论
 
 ```bash
+git clone https://github.com/LGD-Eval/evaluation-protocol.git
+cd evaluation-protocol
 python demo/run_worked_examples.py
 ```
 
