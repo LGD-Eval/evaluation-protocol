@@ -7,6 +7,7 @@ workflows:
         - 'LGD-Eval/lgd-gate@main'
         - 'actions/checkout@v4.4.0'
         - 'actions/upload-artifact@v7.0.2'
+        - 'github/codeql-action@v3'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@v7.0.1'
         - 'github/codeql-action@v4.39.4'
@@ -30,7 +31,7 @@ workflows:
 dependencies:
     'LGD-Eval/lgd-gate@main':
         ref: 'main'
-        commit: 'sha1-b26e4eb212e8ab92e2ac47fe2563d55bbbae92ea'
+        commit: 'sha1-79b2eaad0143b03a12bdfeae09fa455b677fcf6d'
         owner_id: 342496394
         repo_id: 1436123021
     'actions/checkout@v4.4.0':
@@ -58,6 +59,11 @@ dependencies:
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
+    'github/codeql-action@v3':
+        ref: 'v3'
+        commit: 'sha1-d2aacf54c2fbc910db8d7ec338fdb54ea48c692d'
+        owner_id: 9919
+        repo_id: 259445878
     'github/codeql-action@v4.39.4':
         ref: 'v4.39.4'
         commit: 'sha1-1bd86f2fdb4b86187fa4059f16f31a3202acc9ea'
