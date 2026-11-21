@@ -1,0 +1,31 @@
+{
+  "schema": "lgd-eval/expected-outcomes/evaluator-side/v1.0",
+  "warning": "EVALUATOR-SIDE FILE. Implementations under test must not read this file. The inputs-package directory contains no expected outcomes.",
+  "source": "Derived from the published v1.3 conclusion JSONs (same commit); payload_digest values are copied from those conclusions, not recomputed.",
+  "cases": {
+    "caseA": {
+      "outcome_verification": "verified",
+      "reason_code": "none",
+      "policy_action": "allow",
+      "payload_digest": "fa8b1420cca29307"
+    },
+    "caseB1": {
+      "outcome_verification": "unresolved",
+      "reason_code": "authorization_unresolved",
+      "policy_action": "defer",
+      "payload_digest": "a353ad64f911030a"
+    },
+    "caseB2": {
+      "outcome_verification": "rejected",
+      "reason_code": "authorization_rejected",
+      "policy_action": "deny",
+      "payload_digest": "d709c4ec85ef5d6e"
+    },
+    "caseC": {
+      "outcome_verification": "unresolved",
+      "reason_code": "status_unavailable",
+      "policy_action": "defer",
+      "payload_digest": "982c390107058485"
+    }
+  }
+}
