@@ -1,0 +1,15 @@
+{
+  "subject": "Case C — Status source unavailable at verification time (FG-TIDA/use-cases#27)",
+  "domains": {
+    "D2": [
+      {
+        "claim": "Credential status current (not revoked)",
+        "grade": "L",
+        "kind": "audit",
+        "source": "status endpoint unreachable at verification time; no revocation record retrievable",
+        "reproducible": false,
+        "timestamped": false
+      }
+    ]
+  }
+}
