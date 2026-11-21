@@ -1,0 +1,33 @@
+{
+  "subject": "Case A — Valid registered credential issued by an authorized registrar (FG-TIDA/use-cases#27)",
+  "domains": {
+    "D1": [
+      {
+        "claim": "Registration credential issued by registrar authorized under a governance root",
+        "grade": "V",
+        "kind": "audit",
+        "source": "frozen test vector T-A1 + independent replay",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "claim": "Registrar scope verified: resource within declared registration domain",
+        "grade": "V",
+        "kind": "repro-test",
+        "source": "frozen test vector T-A2 + independent replay",
+        "reproducible": true,
+        "timestamped": true
+      }
+    ],
+    "D2": [
+      {
+        "claim": "Credential status current: no revocation, suspension or expiry at verification time",
+        "grade": "V",
+        "kind": "process",
+        "source": "signed status response, frozen vector T-A3",
+        "reproducible": true,
+        "timestamped": true
+      }
+    ]
+  }
+}
