@@ -1,0 +1,12 @@
+{
+  "schema": "ai-manifest/v1",
+  "repository": "LGD-Eval/evaluation-protocol",
+  "role": "规范/投稿仓：加 .well-known/ai.json + README 首屏窄声明",
+  "what_it_is": "Evaluation Protocols, Test Methodologies and L0-L13 Domain Testing Framework | 评测协议与测试方法论（L0-L13 分域测试体系）",
+  "what_it_is_not": "Not a running commercial service. Not a third-party certification, compliance finding, or regulatory approval.",
+  "reproduce": "See the README section \"运行测试 / Running the tests\"; commands are verbatim and require no private network.",
+  "contact": "LGD-Eval",
+  "evidence_state": "Outsider-view probe recorded 2026-11-22 (anonymous, no token); see this repository README and docs.",
+  "last_verified": "2026-11-22",
+  "claims_policy": "No first-in-class, greenfield, or only-implementation claims. Each comparison states its own boundary."
+}
