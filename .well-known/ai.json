@@ -1,7 +1,7 @@
 {
   "schema": "ai-manifest/v1",
   "repository": "LGD-Eval/evaluation-protocol",
-  "role": "规范/投稿仓：加 .well-known/ai.json + README 首屏窄声明",
+  "role": "Evaluation-methodology repo: protocols, test methodologies and L0-L13 domain testing frameworks; methodology is the deliverable, not benchmark scores.",
   "what_it_is": "Evaluation Protocols, Test Methodologies and L0-L13 Domain Testing Framework | 评测协议与测试方法论（L0-L13 分域测试体系）",
   "what_it_is_not": "Not a running commercial service. Not a third-party certification, compliance finding, or regulatory approval.",
   "reproduce": "See the README section \"运行测试 / Running the tests\"; commands are verbatim and require no private network.",
