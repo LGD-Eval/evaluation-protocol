@@ -44,3 +44,43 @@ Interactive demo: `python tools/evidence-grader.py --demo`
 2. 独立执行（不采信自查结论）
 3. 证据闭环（哈希/时间戳/复放步骤）
 4. 独立验收通过方可发布
+
+
+## Anchored contribution · UC30（FG-TIDA WG0 用例 30 配套）
+
+本条目的相关制品已按冻结根 + DOI 外锚发布，任何人可免凭据取件并按原样复跑。
+
+| 项 | 值 |
+|---|---|
+| 版本 DOI | https://doi.org/10.5281/zenodo.24548619 |
+| 概念 DOI | https://doi.org/10.5281/zenodo.24548618 |
+| 版本 | 文本 v0.3 ／ 记录契约 ucr-v0.3 ／ 整包 v16 |
+| 附件 | `UC30_巴黎首会_交付包_v16_20261126.zip`，913,945 B ／ sha256 `9ad5dcc0f08bfbf4b6d891dfbf415f5df9faf1707d1e2616324f521fe4324dea` |
+| 冻结根（Merkle, 30 叶） | `9959f2ab8f83bf585b7d9d77bd18bae194a378c239e6e362621ea14fc9d8481b` |
+
+包内是记录工具链的最小实现：带逐检查结果（通过／失败／未评估）的载荷、**声明式比对对象 `compared_state`**、
+十例一致性向量，以及 Python 与 Node 两套实现（逐检查结论与摘要值一致）。
+
+复现（解包后 `cd uc30_impl`）：
+
+```bash
+python ucr.py selftest      # 期望 SELFTEST OK — 10/10 vectors as expected
+python crosscheck.py        # 期望 CROSSCHECK OK — 10/10 vectors agree across two implementations
+node verify_node.js vectors/case-01-valid.json
+```
+
+其中两条向量直接指向本协议关心的边界：`case-09-no-compared-state`（记录未声明比对对象 → rejected）、
+`case-10-stale-comparison`（比对对象陈旧 → unresolved/defer）。
+
+### 已发布件勘误（原包不改，以保冻结根不变）
+
+1. 包内 `uc30_impl/README.md` 标题写 "reference implementation **v0.2**"、"**八个**一致性向量，8/8"；
+   实际为 v0.3、**十条**向量，实测 10/10。
+2. 同文件"一分钟跑通"第二条 `python mutate.py` 需先跑 `python gen_out.py`（依赖 `out/` 下的记录）。
+
+改动包内任一字节即更换冻结根、断掉与已上线 DOI 的对应关系，故此处只记勘误，不重发。
+
+### 边界（不冒充）
+
+不含撤销检查；判决正确性未证；未对真实流程做仪表化；无第三方人类复跑；
+不主张符合 EU MDR / 21 CFR 820 / EU AI Act。
