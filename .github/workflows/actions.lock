@@ -4,15 +4,14 @@
 version: 'v0.0.3'
 workflows:
     '.github/workflows/auto-eval.yml':
-        - 'LGD-Eval/lgd-gate@main'
         - 'actions/checkout@v4.4.0'
         - 'actions/upload-artifact@v7.0.2'
         - 'github/codeql-action@v3'
+        - 'lgd-eval/lgd-gate@main'
     '.github/workflows/codeql.yml':
         - 'actions/checkout@v7.0.1'
         - 'github/codeql-action@v4.39.4'
-    '.github/workflows/lgd-ci.yml':
-        []
+    '.github/workflows/lgd-ci.yml': []
     '.github/workflows/pr-review.yml':
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
@@ -29,11 +28,6 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/github-script@v9.0.0'
 dependencies:
-    'LGD-Eval/lgd-gate@main':
-        ref: 'main'
-        commit: 'sha1-79b2eaad0143b03a12bdfeae09fa455b677fcf6d'
-        owner_id: 342496394
-        repo_id: 1436123021
     'actions/checkout@v4.4.0':
         ref: 'v4.4.0'
         commit: 'sha1-11d5960a326750d5838078e36cf38b85af677262'
@@ -69,6 +63,11 @@ dependencies:
         commit: 'sha1-1bd86f2fdb4b86187fa4059f16f31a3202acc9ea'
         owner_id: 9919
         repo_id: 259445878
+    'lgd-eval/lgd-gate@main':
+        ref: 'main'
+        commit: 'sha1-79b2eaad0143b03a12bdfeae09fa455b677fcf6d'
+        owner_id: 342496394
+        repo_id: 1436123021
     'ossf/scorecard-action@v2.5.0':
         ref: 'v2.5.0'
         commit: 'sha1-fa7117db83c52d787ae5a89f350999701505d78e'
