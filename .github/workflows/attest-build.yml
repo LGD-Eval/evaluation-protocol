@@ -1,0 +1,30 @@
+name: attest-build
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  attest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 生成被证对象（本源 zip）
+        run: |
+          git archive --format=zip --prefix=evaluation-protocol/ -o subject.zip HEAD
+          sha256sum subject.zip | tee subject.sha256
+      - name: 生成构建来源证明（SLSA build provenance，Sigstore 签名）
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: subject.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: subject-zip
+          path: subject.zip
+          retention-days: 30
