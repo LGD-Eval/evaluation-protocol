@@ -1,0 +1,50 @@
+{
+  "case-01-valid": {
+    "outcome": "verified",
+    "policy_action": "allow"
+  },
+  "case-02-scope-escalation": {
+    "outcome": "rejected",
+    "policy_action": "deny"
+  },
+  "case-03-state-unevaluated": {
+    "outcome": "unresolved",
+    "policy_action": "defer"
+  },
+  "case-04-evidence-weak": {
+    "outcome": "unresolved",
+    "policy_action": "defer"
+  },
+  "case-05-tampered": {
+    "outcome": "rejected",
+    "policy_action": "deny"
+  },
+  "case-06-schema-version": {
+    "outcome": "rejected",
+    "policy_action": "deny"
+  },
+  "case-07-private-state": {
+    "outcome": "rejected",
+    "policy_action": "deny"
+  },
+  "case-08-verdict-missing": {
+    "outcome": "unresolved",
+    "policy_action": "defer"
+  },
+  "case-09-no-compared-state": {
+    "outcome": "rejected",
+    "policy_action": "deny"
+  },
+  "case-10-stale-comparison": {
+    "outcome": "unresolved",
+    "policy_action": "defer"
+  },
+  "case-11-revoked": {
+    "outcome": "rejected",
+    "policy_action": "deny"
+  },
+  "case-12-revocation-unchecked": {
+    "outcome": "unresolved",
+    "policy_action": "defer"
+  }
+}

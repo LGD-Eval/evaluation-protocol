@@ -1,0 +1,295 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lgd-eval.example/ucr/record/v0.1.schema.json",
+  "title": "UC30 compliance artefact record v0.2",
+  "description": "Binds artefact, mandate, delegation, controlled process state, evidence events and per-check verdicts into one verifiable unit. Implements FG-TIDA use-cases#30 section 5 R1-R3 and R5, and the decidable-count metric of section 6. In v0.2 the schema id is part of the payload digest, so a declared-version swap breaks both C1 and C2.",
+  "type": "object",
+  "required": [
+    "schema",
+    "artefact",
+    "mandate",
+    "process_state",
+    "evidence",
+    "verdicts"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "const": "ucr/record/v0.2"
+    },
+    "artefact": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "hash",
+        "produced_at"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "examples": [
+            "change-impact-assessment",
+            "post-market-surveillance-report"
+          ]
+        },
+        "device": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "family": {
+              "type": "string"
+            }
+          }
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[0-9a-f]{8,64}$"
+        },
+        "produced_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "mandate": {
+      "type": "object",
+      "required": [
+        "id",
+        "version",
+        "grantor",
+        "grantee",
+        "scope"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string",
+          "description": "stable identity plus version, so a later scope change cannot be read back into an earlier artefact (R1)"
+        },
+        "grantor": {
+          "type": "object",
+          "required": [
+            "role"
+          ],
+          "properties": {
+            "role": {
+              "type": "string"
+            },
+            "id": {
+              "type": "string"
+            }
+          }
+        },
+        "grantee": {
+          "type": "object",
+          "required": [
+            "agent_id"
+          ],
+          "properties": {
+            "agent_id": {
+              "type": "string"
+            }
+          }
+        },
+        "scope": {
+          "$ref": "#/definitions/scope"
+        },
+        "regime": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "examples": [
+            [
+              "EU MDR 2017/745",
+              "FDA 21 CFR 820"
+            ]
+          ]
+        },
+        "valid_from": {
+          "type": "string",
+          "format": "date"
+        },
+        "valid_to": {
+          "type": "string",
+          "format": "date"
+        }
+      }
+    },
+    "delegation": {
+      "type": "array",
+      "description": "Each hop must narrow or equal the parent scope. Widening is a failure (scope_escalation), not a pass.",
+      "items": {
+        "type": "object",
+        "required": [
+          "grantor_agent",
+          "grantee_agent",
+          "scope"
+        ],
+        "properties": {
+          "grantor_agent": {
+            "type": "string"
+          },
+          "grantee_agent": {
+            "type": "string"
+          },
+          "sop": {
+            "type": "string",
+            "description": "quality-system procedure that fixes the delegated scope"
+          },
+          "scope": {
+            "$ref": "#/definitions/scope"
+          }
+        }
+      }
+    },
+    "process_state": {
+      "type": "object",
+      "required": [
+        "procedure",
+        "revision"
+      ],
+      "properties": {
+        "procedure": {
+          "type": "string"
+        },
+        "revision": {
+          "type": "string"
+        },
+        "captured_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "ref"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "audit",
+              "repro-test",
+              "process",
+              "interop",
+              "signed-credential",
+              "observation"
+            ]
+          },
+          "ref": {
+            "type": "string",
+            "description": "hash or signed reference; never a path into producer-private systems"
+          },
+          "reproducible": {
+            "type": "boolean"
+          },
+          "timestamped": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "verdicts": {
+      "type": "array",
+      "description": "One row per check. A check with no verdict is reported as not_evaluated, never assumed to pass (R5).",
+      "items": {
+        "type": "object",
+        "required": [
+          "check_id",
+          "result"
+        ],
+        "properties": {
+          "check_id": {
+            "type": "string"
+          },
+          "result": {
+            "enum": [
+              "pass",
+              "fail",
+              "not_evaluated"
+            ]
+          },
+          "reason_code": {
+            "enum": [
+              "none",
+              "not_run",
+              "status_unavailable",
+              "missing_evidence",
+              "scope_escalation",
+              "digest_mismatch",
+              "state_change_unrecorded"
+            ],
+            "default": "none"
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "attestation": {
+      "type": "object",
+      "properties": {
+        "issuer": {
+          "type": "string"
+        },
+        "issued_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "key_id": {
+          "type": "string"
+        }
+      }
+    },
+    "reproducibility": {
+      "type": "object",
+      "properties": {
+        "digest_convention": {
+          "type": "string"
+        },
+        "payload_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{16}$"
+        }
+      }
+    }
+  },
+  "definitions": {
+    "scope": {
+      "type": "object",
+      "properties": {
+        "workflow": {
+          "type": "string"
+        },
+        "device_family": {
+          "type": "string"
+        },
+        "artefact_types": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "": "https://lgd-eval.example/ucr/record/v0.2.schema.json"
+}

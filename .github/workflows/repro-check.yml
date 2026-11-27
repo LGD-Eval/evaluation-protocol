@@ -1,0 +1,54 @@
+name: repro-check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  repro:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: 复现块逐条实跑（README 原文，fail-closed）
+        working-directory: uc30_impl
+        run: |
+          set -euo pipefail
+          python ucr.py selftest | tee /tmp/st.txt
+          grep -q "SELFTEST OK — 12/12" /tmp/st.txt
+          python crosscheck.py | tee /tmp/cc.txt
+          grep -q "CROSSCHECK OK — 12/12" /tmp/cc.txt
+          node verify_node.js vectors/case-01-valid.json > /tmp/v1.json
+          grep -q '"verification": "verified"' /tmp/v1.json
+
+      - name: 负向探针一 · 自带篡改向量必须被拒
+        working-directory: uc30_impl
+        run: |
+          set -euo pipefail
+          if node verify_node.js vectors/case-05-tampered.json > /tmp/v5.json 2>&1; then
+            echo "PROBE1 FAILED: case-05 未被拒"; exit 1
+          fi
+          grep -q '"verification": "rejected"' /tmp/v5.json && echo "PROBE1 CAUGHT: case-05 rejected"
+
+      - name: 负向探针二 · 现场改 payload_digest 必须被抓
+        working-directory: uc30_impl
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, pathlib
+          d = json.loads(pathlib.Path('vectors/case-01-valid.json').read_text(encoding='utf-8'))
+          d['record']['reproducibility']['payload_digest'] = '0' * 16
+          pathlib.Path('/tmp/tampered.json').write_text(json.dumps(d, ensure_ascii=False), encoding='utf-8')
+          PY
+          if node verify_node.js /tmp/tampered.json > /tmp/vt.json 2>&1; then
+            echo "PROBE2 FAILED: 改 payload_digest 未被抓"; grep -o '"verification": "[a-z]*"' /tmp/vt.json; exit 1
+          fi
+          grep -q '"C2_digest"' /tmp/vt.json && echo "PROBE2 CAUGHT: C2_digest fail"

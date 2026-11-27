@@ -1,0 +1,161 @@
+{
+  "record": {
+    "schema": "ucr/record/v0.3",
+    "artefact": {
+      "id": "CIA-2026-014",
+      "type": "change-impact-assessment",
+      "device": {
+        "id": "D-114",
+        "family": "IVD"
+      },
+      "hash": "sha256:6f1c2d9a4b7e8f10",
+      "produced_at": "2026-05-20T09:12:00Z"
+    },
+    "mandate": {
+      "id": "M-2026-014",
+      "version": "3",
+      "grantor": {
+        "role": "manufacturer-compliance-owner",
+        "id": "OWNER-01"
+      },
+      "grantee": {
+        "agent_id": "A-LEAD-07"
+      },
+      "scope": {
+        "workflow": "change-impact-assessment",
+        "device_family": "IVD",
+        "artefact_types": [
+          "change-impact-assessment",
+          "evidence-index"
+        ]
+      },
+      "regime": [
+        "EU MDR 2017/745",
+        "FDA 21 CFR 820"
+      ],
+      "valid_from": "2026-03-01",
+      "valid_to": "2026-09-30"
+    },
+    "delegation": [
+      {
+        "grantor_agent": "A-LEAD-07",
+        "grantee_agent": "A-T1",
+        "sop": "QP-8.2",
+        "scope": {
+          "workflow": "change-impact-assessment",
+          "device_family": "IVD",
+          "artefact_types": [
+            "change-impact-assessment"
+          ]
+        }
+      },
+      {
+        "grantor_agent": "A-LEAD-07",
+        "grantee_agent": "A-T2",
+        "sop": "QP-8.2",
+        "scope": {
+          "workflow": "change-impact-assessment",
+          "device_family": "IVD",
+          "artefact_types": [
+            "evidence-index"
+          ]
+        }
+      }
+    ],
+    "process_state": {
+      "procedure": "QP-8.2",
+      "revision": "8.2",
+      "captured_at": "2026-05-20T09:05:00Z"
+    },
+    "evidence": [
+      {
+        "id": "EV-1",
+        "kind": "signed-credential",
+        "ref": "sha256:aa01bb02",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "id": "EV-2",
+        "kind": "process",
+        "ref": "sha256:cc03dd04",
+        "reproducible": true,
+        "timestamped": true
+      },
+      {
+        "id": "EV-3",
+        "kind": "audit",
+        "ref": "sha256:ee05ff06",
+        "reproducible": true,
+        "timestamped": true
+      }
+    ],
+    "verdicts": [
+      {
+        "check_id": "C1_schema",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      },
+      {
+        "check_id": "C2_digest",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      },
+      {
+        "check_id": "C3_mandate_chain",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      },
+      {
+        "check_id": "C4_state_version",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      },
+      {
+        "check_id": "C5_evidence_present",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      },
+      {
+        "check_id": "C6_verdict_complete",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      },
+      {
+        "check_id": "C7_no_private_state",
+        "result": "not_evaluated",
+        "reason_code": "not_run",
+        "note": "no verdict supplied by the producer; named here rather than assumed"
+      }
+    ],
+    "attestation": {
+      "issuer": "attestation-service",
+      "issued_at": "2026-05-20T09:13:00Z",
+      "key_id": "as-key-2026"
+    },
+    "compared_state": {
+      "procedure": "QP-8.2",
+      "revision": "8.2",
+      "captured_at": "2026-05-20T09:12:00Z",
+      "asserted_by": "A-LEAD-07@emission"
+    },
+    "reproducibility": {
+      "digest_convention": "sha256(json.dumps(obj, sort_keys=True, separators=(\",\", \":\"), ensure_ascii=False))[:16]",
+      "payload_digest": "1ef5865e6b9e8924"
+    }
+  },
+  "current_state": {
+    "procedure": "QP-8.3",
+    "revision": "8.3"
+  },
+  "expected": {
+    "outcome": "unresolved",
+    "policy_action": "defer"
+  }
+}
